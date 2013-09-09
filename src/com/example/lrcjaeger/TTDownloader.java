@@ -4,6 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -12,32 +19,69 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import android.util.Log;
 
 /**
  * Utils for quering and getting lyrics from qianqianjingting server.
  */
 public class TTDownloader {
-    private static final String SERVER_URL = "http://ttlrcct.qianqian.com/dll/lyricsvr.dll?";
     private static final String TAG = "LrcJaeger/TTDownloader";
     
+    private static final String SERVER_URL = "http://ttlrccnc.qianqian.com/dll/lyricsvr.dll?";
+    private static final String SERVER_URL_CT =  "http://ttlrccct2.qianqian.com/dll/lyricsvr.dll?";
+
+    private static final char[] DIGIT = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
+        'B', 'C', 'D', 'E', 'F' };
     
     /** 
      * Convert character string to hex string.
      * @param str string to convert
-     * */
+     */
     private static String toHexString(String str) {
-        if (str == null) {
-            return null;
+        String newStr = filterString(str);
+        Log.v(TAG, "toHexString from " + newStr);
+        byte[] strBytes = null;
+        try {
+            strBytes = newStr.toLowerCase().getBytes("UTF-16LE");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-
-        byte[] tmp = str.getBytes();
-        StringBuilder sb = new StringBuilder();
-        for (byte ch : tmp) {
-            sb.append(Integer.toHexString(ch));
+        if (strBytes == null) {
+            throw new IllegalArgumentException("cannot get hex string from " + newStr);
         }
-        return sb.toString();
+        
+        StringBuilder builder = new StringBuilder();  
+        char[] tmp = new char[2];
+        for (byte byteValue : strBytes) {
+            tmp[0] = DIGIT[(byteValue >>> 4) & 0X0F];
+            tmp[1] = DIGIT[byteValue & 0X0F];
+            builder.append(tmp);
+        }
+        
+        return builder.toString();
     }
     
+    private static String filterString(String str) {
+        // 转小写
+        str = str.toLowerCase();
+        // 去括号，大中小还有全角的小括号
+        str = str.replaceAll("[\\[\\]{}\\(\\)（）]+", "");
+        // 去除半角特殊符号，空格，逗号，etc
+        str = str.replaceAll("[\\s\\/:\\@\\`\\~\\-,\\.]+", "");
+        // 去除全角特殊符号
+        str = str.replaceAll("[\u2014\u2018\u201c\u2026\u3001\u3002\u300a\u300b\u300e\u300f\u3010\u3011" + 
+                    "\u30fb\uff01\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff5e\uffe5]+", "");
+        // TODO　简繁转换
+        return str;
+    }
+    
+
     /**
      * Parameters must be encoded in utf8.
      * @param artist can be null
@@ -45,15 +89,52 @@ public class TTDownloader {
      * @return url for quering
      */
     private static String buildQueryUrl(String artist, String title) {
-        return SERVER_URL + "sh?Artist=" + artist + "&Title=" + title;
+        String titleHex = toHexString(title);
+        String aritistHex = toHexString(artist);
+        String url = SERVER_URL + "sh?Artist=" + aritistHex + "&Title=" + titleHex;
+        Log.v(TAG, "query url is " + url);
+        return url;
     }
     
     /**
      * Parameters must be encoded in utf8.
      * @return url for downloading
      */
-    private static String buildDownloadUrl(int lrcId, int code ) {
+    private static String buildDownloadUrl(int lrcId, int code) {
         return SERVER_URL + "dl?Id=" + lrcId + "&Code=" + code;
+    }
+    
+    public static String download(QueryResult item) {
+        try {
+            int code = computeCode(item.mId, item.mArtist, item.mTitle);
+            String url = buildDownloadUrl(item.mId, code);
+
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpGet httppost = new HttpGet(url);
+
+            // Execute HTTP Post Request
+            HttpResponse response = httpclient.execute(httppost);
+            HttpEntity ht = response.getEntity();
+
+            BufferedHttpEntity buf = new BufferedHttpEntity(ht);
+            InputStream is = buf.getContent();
+            BufferedReader r = new BufferedReader(new InputStreamReader(is));
+
+            StringBuilder total = new StringBuilder();
+            String line;
+            while ((line = r.readLine()) != null) {
+                total.append(line);
+            }
+            return total.toString();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
     }
     
     /**
@@ -62,111 +143,124 @@ public class TTDownloader {
      * @param title
      * @return
      */
-    public static String queryLyrics(String artist, String title) {
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpGet httppost = new HttpGet("http://ttlrccnc.qianqian.com/dll/lyricsvr.dll?sh?Artist=954EE353D5889999&Title=670072006F00770073006C006F0077006C007900");
+    public static ArrayList<QueryResult> query(String artist, String title) {
+        ArrayList<QueryResult> result = new ArrayList<QueryResult>();
+        String xml = getXmlResultFromServer(artist, title);
+        if (xml == null) {
+            Log.e(TAG, "Error: cannot get xml response from server");
+            return null;
+        }
+        Log.v(TAG, "xml is " + xml);
 
+        Document doc = null;
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(xml));
+            doc = builder.parse(is);
+            NodeList nl = doc.getElementsByTagName(QueryResult.ITEM_LRC);
+    
+            for (int i = 0; i < nl.getLength(); i++) {
+                Element elem = (Element) nl.item(i);
+                String id = elem.getAttribute(QueryResult.ATTRIBUTE_ID);
+                String art = elem.getAttribute(QueryResult.ATTRIBUTE_ARTIST);
+                String tit = elem.getAttribute(QueryResult.ATTRIBUTE_TITLE);
+                result.add(new QueryResult(Integer.parseInt(id), art, tit));
+                Log.v(TAG, "======== id = " + id + ", art = " + art + ", title = " + tit);
+            }
+        } catch (ParserConfigurationException e) {
+            Log.e("Error: ", e.getMessage());
+        } catch (SAXException e) {
+            Log.e("Error: ", e.getMessage());
+        } catch (IOException e) {
+            Log.e("Error: ", e.getMessage());
+        }
+        return result;
+    }
+    
+    private static String getXmlResultFromServer(String artist, String title) {
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpGet httppost = new HttpGet(buildQueryUrl(artist, title));
+        
         try {
             // Execute HTTP Post Request
             HttpResponse response = httpclient.execute(httppost);
-
             HttpEntity ht = response.getEntity();
+            
+            BufferedHttpEntity buf = new BufferedHttpEntity(ht);
+            InputStream is = buf.getContent();
+            BufferedReader r = new BufferedReader(new InputStreamReader(is));
 
-                BufferedHttpEntity buf = new BufferedHttpEntity(ht);
-
-                InputStream is = buf.getContent();
-
-                BufferedReader r = new BufferedReader(new InputStreamReader(is));
-
-                StringBuilder total = new StringBuilder();
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line);
-                }
-                return total.toString();
-
+            StringBuilder total = new StringBuilder();
+            String line;
+            while ((line = r.readLine()) != null) {
+                total.append(line);
+            }
+            return total.toString();
         } catch (ClientProtocolException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
     
-    
-    
     /**
-     * Compute code for a given lrcId. Must call {@link #queryLyrics(String, String)} 
+     * Compute code for a given lrcId. Must call {@link #query(String, String)} 
      * first, which returns a XML file containing all parameters.
+     * @param lrcId attribute in the XML file, unique id
      * @param artist attribute in the XML file, not the artist used in querying
      * @param title attribute in the XML file, not the title used in querying
-     * @param lrcId attribute in the XML file, unique id
      * @return
      */
-    public static String computeCode(String artist, String title, int lrcId) {
-        String qqHexStr = toHexString(artist + title);
-        int length = qqHexStr.length() / 2;
-        int[] song = new int[length];
-        for (int i = 0; i < length; i++) {
-            song[i] = Integer.parseInt(qqHexStr.substring(i * 2, i * 2 + 2), 16);
+    private static int computeCode(int lrcId, String artist, String title)
+            throws UnsupportedEncodingException {
+        byte[] bytes = (artist + title).getBytes("UTF-8");
+        int[] song = new int[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            song[i] = bytes[i] & 0xff;
         }
-        
-        int t1 = 0, t2 = 0, t3 = 0;
-        t1 = (lrcId & 0x0000FF00) >> 8;
-        if ((lrcId & 0x00FF0000) == 0) {
-            t3 = 0x000000FF & ~t1;
+        int intVal1 = 0, intVal2 = 0, intVal3 = 0;
+        intVal1 = (lrcId & 0xFF00) >> 8;
+        if ((lrcId & 0xFF0000) == 0) {
+            intVal3 = 0xFF & ~intVal1;
         } else {
-            t3 = 0x000000FF & ((lrcId & 0x00FF0000) >> 16);
+            intVal3 = 0xFF & ((lrcId & 0x00FF0000) >> 16);
         }
-
-        t3 = t3 | ((0x000000FF & lrcId) << 8);
-        t3 = t3 << 8;
-        t3 = t3 | (0x000000FF & t1);
-        t3 = t3 << 8;
+        intVal3 = intVal3 | ((0xFF & lrcId) << 8);
+        intVal3 = intVal3 << 8;
+        intVal3 = intVal3 | (0xFF & intVal1);
+        intVal3 = intVal3 << 8;
         if ((lrcId & 0xFF000000) == 0) {
-            t3 = t3 | (0x000000FF & (~lrcId));
+            intVal3 = intVal3 | (0xFF & (~lrcId));
         } else {
-            t3 = t3 | (0x000000FF & (lrcId >> 24));
+            intVal3 = intVal3 | (0xFF & (lrcId >> 24));
         }
-
-        int j = length - 1;
-        while (j >= 0) {
-            int c = song[j];
-            if (c >= 0x80) c = c - 0x100;
-
-            t1 = (int)((c + t2) & 0x00000000FFFFFFFF);
-            t2 = (int)((t2 << (j % 2 + 4)) & 0x00000000FFFFFFFF);
-            t2 = (int)((t1 + t2) & 0x00000000FFFFFFFF);
-            j -= 1;
+        int uBound = bytes.length - 1;
+        while (uBound >= 0) {
+            int c = song[uBound];
+            if (c >= 0x80)
+                c = c - 0x100;
+            intVal1 = c + intVal2;
+            intVal2 = intVal2 << (uBound % 2 + 4);
+            intVal2 = intVal1 + intVal2;
+            uBound -= 1;
         }
-        j = 0;
-        t1 = 0;
-        while (j <= length - 1) {
-            int c = song[j];
-            if (c > 128) c = c - 256;
-            int t4 = (int)((c + t1) & 0x00000000FFFFFFFF);
-            t1 = (int)((t1 << (j % 2 + 3)) & 0x00000000FFFFFFFF);
-            t1 = (int)((t1 + t4) & 0x00000000FFFFFFFF);
-            j += 1;
+        uBound = 0;
+        intVal1 = 0;
+        while (uBound <= bytes.length - 1) {
+            int c = song[uBound];
+            if (c >= 128)
+                c = c - 256;
+            int intVal4 = c + intVal1;
+            intVal1 = intVal1 << (uBound % 2 + 3);
+            intVal1 = intVal1 + intVal4;
+            uBound += 1;
         }
-
-        int t5 = (int)Conv(t2 ^ t3);
-        t5 = (int)Conv(t5 + (t1 | lrcId));
-        t5 = (int)Conv(t5 * (t1 | t3));
-        t5 = (int)Conv(t5 * (t2 ^ lrcId));
-
-        long t6 = (long)t5;
-        if (t6 > 2147483648L)
-            t5 = (int)(t6 - 4294967296L);
-        return String.valueOf(t5);
+        int intVal5 = intVal2 ^ intVal3;
+        intVal5 = intVal5 + (intVal1 | lrcId);
+        intVal5 = intVal5 * (intVal1 | intVal3);
+        intVal5 = intVal5 * (intVal2 ^ lrcId);
+        return intVal5;
     }
-    
-    private static long Conv(int i) {
-        long r = i % 4294967296L;
-        if (i >= 0 && r > 2147483648L)
-            r = r - 4294967296L;
 
-        if (i < 0 && r < 2147483648L)
-            r = r + 4294967296L;
-        return r;
-    }
 }

@@ -1,5 +1,7 @@
 package com.example.lrcjaeger;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,28 +41,13 @@ public class LrcJaeger extends Activity {
         
         @Override
         public void handleMessage(Message msg) {
-            String result = TTDownloader.queryLyrics(null, null);
-            Log.d(TAG, "result is " + result);
+            ArrayList<QueryResult> lrcs = TTDownloader.query("alan", "Diamond");
+            for (QueryResult item : lrcs) {
+                String result = TTDownloader.download(item);
+                Log.d(TAG, "result is " + result);
+                Log.v(TAG, "==================================================");
+            }
         }
     };
-    
-    private void test() {
-//        System.out.println("Code = 108159856, Id = 172943, Artist = alan, Title = diamond");
-//
-//        try {
-//            URL url = new URL("http://ttlrcct.qianqian.com/dll/lyricsvr.dll?sh?Artist" +
-//                    "=790075006900&Title=61006700610069006E00&Flags=0");
-//            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-//            String inputLine;
-//            while ((inputLine = in.readLine()) != null)
-//                System.out.println(inputLine);
-//            in.close();
-//        } catch (MalformedURLException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("Code = " + LrcUtils.computeCode("alan", "Diamond", 172943));
-    }
 
 }
