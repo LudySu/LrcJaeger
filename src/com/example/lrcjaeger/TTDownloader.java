@@ -97,7 +97,6 @@ public class TTDownloader {
     }
     
     /**
-     * Parameters must be encoded in utf8.
      * @return url for downloading
      */
     private static String buildDownloadUrl(int lrcId, int code) {
@@ -109,28 +108,9 @@ public class TTDownloader {
             int code = computeCode(item.mId, item.mArtist, item.mTitle);
             String url = buildDownloadUrl(item.mId, code);
 
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpGet httppost = new HttpGet(url);
-
-            // Execute HTTP Post Request
-            HttpResponse response = httpclient.execute(httppost);
-            HttpEntity ht = response.getEntity();
-
-            BufferedHttpEntity buf = new BufferedHttpEntity(ht);
-            InputStream is = buf.getContent();
-            BufferedReader r = new BufferedReader(new InputStreamReader(is));
-
-            StringBuilder total = new StringBuilder();
-            String line;
-            while ((line = r.readLine()) != null) {
-                total.append(line);
-            }
-            return total.toString();
+            String result = getHttpResponse(url);
+            return result;
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
         
@@ -145,7 +125,7 @@ public class TTDownloader {
      */
     public static ArrayList<QueryResult> query(String artist, String title) {
         ArrayList<QueryResult> result = new ArrayList<QueryResult>();
-        String xml = getXmlResultFromServer(artist, title);
+        String xml = getHttpResponse(buildQueryUrl(artist, title));
         if (xml == null) {
             Log.e(TAG, "Error: cannot get xml response from server");
             return null;
@@ -177,9 +157,9 @@ public class TTDownloader {
         return result;
     }
     
-    private static String getXmlResultFromServer(String artist, String title) {
+    private static String getHttpResponse(String url) {
         HttpClient httpclient = new DefaultHttpClient();
-        HttpGet httppost = new HttpGet(buildQueryUrl(artist, title));
+        HttpGet httppost = new HttpGet(url);
         
         try {
             // Execute HTTP Post Request
