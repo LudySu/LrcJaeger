@@ -1,8 +1,11 @@
 package com.example.lrcjaeger;
 
+import java.io.File;
+
 public class SongItem {
     private String mTitle;
     private String mArtist;
+    private String mPath;
     private boolean mHasLrc;
     
     public String getTitle() {
@@ -12,27 +15,32 @@ public class SongItem {
     public String getArtist() {
         return mArtist;
     }
+    
+    public String getPath() {
+        return mPath;
+    }
 
     public boolean isHasLrc() {
         return mHasLrc;
     }
-    
-    public void setTitle(String mTitle) {
-        this.mTitle = mTitle;
-    }
 
-    public void setArtist(String mArtist) {
-        this.mArtist = mArtist;
-    }
-
-    public void setHasLrc(boolean mHasLrc) {
-        this.mHasLrc = mHasLrc;
-    }
-
-    public SongItem(String title, String artist, boolean hasLrc) {
+    public SongItem(String title, String artist, String path) {
         mTitle = title;
         mArtist = artist;
-        mHasLrc = hasLrc;
+        mPath = path;
+        
+        String lrcPath = getLrcPath(path);
+        mHasLrc = (new File(lrcPath)).exists();
     }
 
+    /** 
+     * Get file extension name, with leading dot
+     */
+    private static String getLrcPath(String file) {
+        int index = file.lastIndexOf(".");
+        if (index != -1 && file.length() > index + 1) {
+            return file.substring(0, index) + ".lrc";
+        }
+        return "";
+    }
 }

@@ -5,6 +5,8 @@ package com.example.lrcjaeger;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +40,7 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         
         if (song.isHasLrc()) {
             TextView hasLrc = (TextView) convertView.findViewById(R.id.tv_has_lrc);
-            hasLrc.setTextColor(0);
+            hasLrc.setTextColor(Color.BLACK);
         }
         
         return convertView;
