@@ -3,6 +3,6 @@
 
     <string name="app_name">LrcJaeger</string>
     <string name="lrc_icon">Lrc</string>
-    <string name="menu_settings">Settings</string>
+    <string name="menu_downall">Down All</string>
 
 </resources>

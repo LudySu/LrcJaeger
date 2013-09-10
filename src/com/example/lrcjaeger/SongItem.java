@@ -6,6 +6,7 @@ public class SongItem {
     private String mTitle;
     private String mArtist;
     private String mPath;
+    private String mLrcPath;
     private boolean mHasLrc;
     
     public String getTitle() {
@@ -19,6 +20,10 @@ public class SongItem {
     public String getPath() {
         return mPath;
     }
+    
+    public String getLrcPath() {
+        return mLrcPath;
+    }
 
     public boolean isHasLrc() {
         return mHasLrc;
@@ -29,8 +34,8 @@ public class SongItem {
         mArtist = artist;
         mPath = path;
         
-        String lrcPath = getLrcPath(path);
-        mHasLrc = (new File(lrcPath)).exists();
+        mLrcPath = getLrcPath(path);
+        mHasLrc = mLrcPath == null ? false : (new File(mLrcPath)).exists();
     }
 
     /** 
@@ -41,6 +46,6 @@ public class SongItem {
         if (index != -1 && file.length() > index + 1) {
             return file.substring(0, index) + ".lrc";
         }
-        return "";
+        return null;
     }
 }

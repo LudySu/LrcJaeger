@@ -3,6 +3,6 @@
 
     <string name="app_name">歌词猎手</string>
     <string name="lrc_icon">词</string>
-    <string name="menu_settings">设置</string>
+    <string name="menu_downall">全部下载</string>
 
 </resources>
