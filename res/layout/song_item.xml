@@ -15,7 +15,6 @@
         android:paddingBottom="2dip"
         android:paddingTop="1dip"
         android:text="@string/lrc_icon"
-        android:textColor="#A8A8A8"
         android:textSize="30sp" />
 
     <LinearLayout

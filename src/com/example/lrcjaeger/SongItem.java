@@ -37,6 +37,13 @@ public class SongItem {
         mLrcPath = getLrcPath(path);
         mHasLrc = mLrcPath == null ? false : (new File(mLrcPath)).exists();
     }
+    
+    public boolean updateStatus() {
+        boolean hasLrc = (new File(mLrcPath)).exists() ? true : false;
+        boolean changed = hasLrc == mHasLrc;
+        mHasLrc = hasLrc;
+        return changed;
+    }
 
     /** 
      * Get file extension name, with leading dot

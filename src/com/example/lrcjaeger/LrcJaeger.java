@@ -1,11 +1,10 @@
 package com.example.lrcjaeger;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -21,8 +20,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ListView;
 
 public class LrcJaeger extends Activity {
@@ -36,6 +33,7 @@ public class LrcJaeger extends Activity {
     private LrcHandler mLrcHandler;
     private ListView mListView;
     private SongItemAdapter mAdapter;
+    private MenuItem mDownAllButton;
     
     private Handler mUiHandler = new Handler() {
         @Override
@@ -46,7 +44,7 @@ public class LrcJaeger extends Activity {
                 mAdapter.clear();
                 Cursor c = null;
                 try {
-                    c = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, PROJECTION, null, null, "title");
+                    c = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, PROJECTION, null, null, "title_key");
                     if (c != null && c.moveToFirst()) {
                         do {
                             String path = c.getString(1);
@@ -67,14 +65,28 @@ public class LrcJaeger extends Activity {
                     if (!item.isHasLrc()) {
                         Message m = mLrcHandler.obtainMessage(0, item);
                         mLrcHandler.sendMessage(m);
+                        break; // FIXME
                     }
                 }
-                this.sendEmptyMessage(MSG_UPDATE_LRC_ICON);
+                if (mDownAllButton != null) {
+                    mDownAllButton.collapseActionView();
+                    mDownAllButton.setActionView(null);
+                }
                 break;
             case MSG_UPDATE_LRC_ICON:
-//                for (int i = 0; i < mAdapter.getCount(); i++) {
-//                    SongItem item = mAdapter.getItem(i);
-//                }
+                String path = (String) msg.obj;
+                if (path == null) {
+                    Log.w(TAG, "file path null");
+                    return;
+                }
+                for (int i = 0; i < mAdapter.getCount(); i++) {
+                    SongItem item = mAdapter.getItem(i);
+                    if (item.getPath().equals(path)) {
+                        item.updateStatus();
+                        Log.v(TAG, "updating " + item.getTitle() + ", hasLrc " + item.isHasLrc());
+                    }
+                }
+                mAdapter.notifyDataSetChanged();
                 break;
             default:
                 Log.w(TAG, "Unknown message");
@@ -86,7 +98,6 @@ public class LrcJaeger extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_lrc_jaeger);
         
         mListView = (ListView) findViewById(R.id.lv_song_items);
@@ -95,7 +106,7 @@ public class LrcJaeger extends Activity {
         
         // initial UI
         mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
-        HandlerThread ht = new HandlerThread("network");
+        HandlerThread ht = new HandlerThread("network-thread");
         ht.start();
         mLrcHandler = new LrcHandler(ht.getLooper());
     }
@@ -107,6 +118,7 @@ public class LrcJaeger extends Activity {
         mAdapter.clear();
         mAdapter = null;
         mUiHandler.removeCallbacksAndMessages(null);
+        mLrcHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -121,6 +133,9 @@ public class LrcJaeger extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_downall:
+            mDownAllButton = item;
+            item.setActionView(R.layout.progressbar);
+            item.expandActionView();
             mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
             break;
 
@@ -146,29 +161,14 @@ public class LrcJaeger extends Activity {
             ArrayList<QueryResult> lrcs = TTDownloader.query(item.getArtist(), item.getTitle());
             if (lrcs != null) {
                 for (QueryResult i : lrcs) {
-                    String result = TTDownloader.download(i);
-//                    Log.d(TAG, "result is " + result);
-//                    Log.v(TAG, "==================================================");
-                    BufferedOutputStream bos = null;
-                    try {
-                        bos = new BufferedOutputStream(new FileOutputStream(item.getLrcPath()));
-                        bos.write(result.getBytes());
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (bos != null) {
-                            try {
-                                bos.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
+                    boolean result = TTDownloader.download(i, item.getLrcPath());
+                    Log.d(TAG, "lrc result is " + result);
                     break;
                 }
             }
+            
+            Message m = mUiHandler.obtainMessage(MSG_UPDATE_LRC_ICON, item.getPath());
+            mUiHandler.sendMessage(m);
         }
     };
 

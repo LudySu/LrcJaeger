@@ -1,6 +1,9 @@
 package com.example.lrcjaeger;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -117,6 +120,28 @@ public class TTDownloader {
         return null;
     }
     
+    public static boolean download(QueryResult item, String lrcPath) {
+        try {
+            int code = computeCode(item.mId, item.mArtist, item.mTitle);
+            String url = buildDownloadUrl(item.mId, code);
+            String result = getHttpResponse(url);
+            
+            FileWriter fstream = new FileWriter(lrcPath, false);
+            BufferedWriter out = new BufferedWriter(fstream);
+            out.write(result);
+            out.close();
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    
     /**
      * Query for lyrics, parameters must be encoded in utf8.
      * @param artist can be null
@@ -173,7 +198,7 @@ public class TTDownloader {
             StringBuilder total = new StringBuilder();
             String line;
             while ((line = r.readLine()) != null) {
-                total.append(line);
+                total.append(line + "\n");
             }
             return total.toString();
         } catch (ClientProtocolException e) {
