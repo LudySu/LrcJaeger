@@ -50,7 +50,7 @@ public class LrcJaeger extends Activity {
                     String path = c.getString(1);
                     String artist = c.getString(2);
                     String title = c.getString(3);
-                    mAdapter.add(new SongItem(artist, title, false));
+                    mAdapter.add(new SongItem(title, artist, false));
                 } while (c.moveToNext());
             }
         } finally {

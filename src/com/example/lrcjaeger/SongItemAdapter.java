@@ -29,11 +29,17 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         
         SongItem song = mSongs.get(position);
         
-        TextView songName = (TextView) convertView.findViewById(R.id.tv_song_name);
-        songName.setText(song.getTitle());
+        TextView title = (TextView) convertView.findViewById(R.id.tv_song_title);
+        title.setText(song.getTitle());
+        
+        TextView artist = (TextView) convertView.findViewById(R.id.tv_song_artist);
+        artist.setText(song.getArtist());
 
-//        ImageView fileIcon = (ImageView) convertView.findViewById(R.id.img_file_icon);
-//        fileIcon.setImageResource(currentFile.getIconResId());
+        
+        if (song.isHasLrc()) {
+            TextView hasLrc = (TextView) convertView.findViewById(R.id.tv_has_lrc);
+            hasLrc.setTextColor(0);
+        }
         
         return convertView;
     }

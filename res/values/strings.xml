@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">LrcJaeger</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="lrc_icon">Lrc</string>
     <string name="menu_settings">Settings</string>
 
 </resources>
