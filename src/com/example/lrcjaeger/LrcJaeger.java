@@ -13,11 +13,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-// TODO: 换ui，手动搜索下载，下载过滤规则，歌词删除，歌词编辑
+// TODO: 换ui，手动搜索下载，×下载过滤规则，歌词删除，×歌词编辑，×选择服务器
 
 public class LrcJaeger extends Activity {
     private static final String TAG = "LrcJaeger";
@@ -31,6 +35,7 @@ public class LrcJaeger extends Activity {
     private SongItemAdapter mAdapter;
     private MenuItem mDownAllButton;
     private ProgressBar mProgressBar;
+    private DownloadTask mTask;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,7 @@ public class LrcJaeger extends Activity {
         mListView = (ListView) findViewById(R.id.lv_song_items);
         mAdapter = new SongItemAdapter(this, new ArrayList<SongItem>());
         mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(null);
         
         // initial song list
         mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
@@ -57,6 +63,9 @@ public class LrcJaeger extends Activity {
     public void onDestroy() {
         super.onDestroy();
         
+        if (mTask != null) {
+            mTask.cancel(true);
+        }
         mAdapter.clear();
         mAdapter = null;
         mUiHandler.removeCallbacksAndMessages(null);
@@ -93,6 +102,11 @@ public class LrcJaeger extends Activity {
         return true;
     } 
     
+    public OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        }
+    };
     
     private Handler mUiHandler = new Handler() {
         @Override
@@ -127,7 +141,8 @@ public class LrcJaeger extends Activity {
                     }
                 }
                 if (list.size() > 0) {
-                    new DownloadTask().execute(list.toArray(new SongItem[1]));
+                    mTask = new DownloadTask();
+                    mTask.execute(list.toArray(new SongItem[1]));
                 }
                 break;
             case MSG_UPDATE_LRC_ICON:
@@ -154,6 +169,10 @@ public class LrcJaeger extends Activity {
             int downloaded = 0;
             int total = list.length;
             for (SongItem item : list) {
+                if (isCancelled()) {
+                    Log.i(TAG, "download task is canceled, " + (total - count) + " items left");
+                    break;
+                }
                 count++;
                 ArrayList<QueryResult> lrcs = TTDownloader.query(item.getArtist(), item.getTitle());
                 if (lrcs != null && lrcs.size() > 0) {

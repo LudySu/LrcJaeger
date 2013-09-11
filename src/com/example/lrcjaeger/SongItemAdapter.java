@@ -37,7 +37,7 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         TextView artist = (TextView) convertView.findViewById(R.id.tv_song_artist);
         artist.setText(song.getArtist());
 
-        int color = song.isHasLrc() ? Color.BLACK : Color.GRAY;
+        int color = song.isHasLrc() ? Color.BLACK : Color.LTGRAY;
         TextView hasLrc = (TextView) convertView.findViewById(R.id.tv_has_lrc);
         hasLrc.setTextColor(color);
         
