@@ -65,7 +65,6 @@ public class LrcJaeger extends Activity {
                     if (!item.isHasLrc()) {
                         Message m = mLrcHandler.obtainMessage(0, item);
                         mLrcHandler.sendMessage(m);
-                        break; // FIXME
                     }
                 }
                 if (mDownAllButton != null) {
@@ -159,14 +158,8 @@ public class LrcJaeger extends Activity {
                 return;
             }
             ArrayList<QueryResult> lrcs = TTDownloader.query(item.getArtist(), item.getTitle());
-            if (lrcs != null) {
-                for (QueryResult i : lrcs) {
-                    boolean result = TTDownloader.download(i, item.getLrcPath());
-                    Log.d(TAG, "lrc result is " + result);
-                    break;
-                }
-            }
-            
+            boolean result = TTDownloader.download(lrcs, item.getLrcPath(), TTDownloader.DOWNLLOAD_SHORTEST_NAME);
+
             Message m = mUiHandler.obtainMessage(MSG_UPDATE_LRC_ICON, item.getPath());
             mUiHandler.sendMessage(m);
         }

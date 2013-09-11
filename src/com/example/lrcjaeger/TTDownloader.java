@@ -122,23 +122,35 @@ public class TTDownloader {
     
     public static boolean download(QueryResult item, String lrcPath) {
         try {
-            int code = computeCode(item.mId, item.mArtist, item.mTitle);
-            String url = buildDownloadUrl(item.mId, code);
-            String result = getHttpResponse(url);
+            String result = download(item);
             
             FileWriter fstream = new FileWriter(lrcPath, false);
             BufferedWriter out = new BufferedWriter(fstream);
             out.write(result);
             out.close();
             return true;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        return false;
+    }
+    
+    public static int DOWNLLOAD_SHORTEST_NAME = 1;
+    public static boolean download(ArrayList<QueryResult> items, String lrcPath, int flag) {
+        int index = -1;
+        int min = 0;
+        for (int i = 0; i < items.size(); i++) {
+            QueryResult item = items.get(i);
+            int size = item.mArtist.length() + item.mTitle.length();
+            if (size < min || min == 0) {
+                min = size;
+                index = i;
+            }
+        }
+        if (index >= 0) {
+            return download(items.get(index), lrcPath);
+        }
         return false;
     }
     
@@ -182,6 +194,7 @@ public class TTDownloader {
         return result;
     }
     
+    private static String LINE_SEPERATOR = System.getProperty("line.separator");
     private static String getHttpResponse(String url) {
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httppost = new HttpGet(url);
@@ -198,7 +211,8 @@ public class TTDownloader {
             StringBuilder total = new StringBuilder();
             String line;
             while ((line = r.readLine()) != null) {
-                total.append(line + "\n");
+                total.append(line);
+                total.append(LINE_SEPERATOR);
             }
             return total.toString();
         } catch (ClientProtocolException e) {
