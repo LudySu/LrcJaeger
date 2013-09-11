@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class LrcJaeger extends Activity {
     private static final String TAG = "LrcJaeger";
@@ -132,6 +133,10 @@ public class LrcJaeger extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_downall:
+            if (!Utils.isNetworkAvailable(this)) {
+                Toast.makeText(this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT);
+                break;
+            }
             mDownAllButton = item;
             item.setActionView(R.layout.progressbar);
             item.expandActionView();
@@ -158,10 +163,12 @@ public class LrcJaeger extends Activity {
                 return;
             }
             ArrayList<QueryResult> lrcs = TTDownloader.query(item.getArtist(), item.getTitle());
-            boolean result = TTDownloader.download(lrcs, item.getLrcPath(), TTDownloader.DOWNLLOAD_SHORTEST_NAME);
+            if (lrcs != null && lrcs.size() > 0) {
+                boolean result = TTDownloader.download(lrcs, item.getLrcPath(), TTDownloader.DOWNLLOAD_SHORTEST_NAME);
 
-            Message m = mUiHandler.obtainMessage(MSG_UPDATE_LRC_ICON, item.getPath());
-            mUiHandler.sendMessage(m);
+                Message m = mUiHandler.obtainMessage(MSG_UPDATE_LRC_ICON, item.getPath());
+                mUiHandler.sendMessage(m);
+            }
         }
     };
 

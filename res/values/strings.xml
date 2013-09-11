@@ -4,5 +4,7 @@
     <string name="app_name">LrcJaeger</string>
     <string name="lrc_icon">Lrc</string>
     <string name="menu_downall">Down All</string>
+    
+    <string name="toast_no_network_connection">No WiFi or 3G network connection</string>
 
 </resources>
