@@ -137,15 +137,31 @@ public class TTDownloader {
     }
     
     public static int DOWNLLOAD_SHORTEST_NAME = 1; // FIXME
+    public static int DOWNLLOAD_CONTAIN_NAME = 2; // contains zhongri, or longest name
     public static boolean download(ArrayList<QueryResult> items, String lrcPath, int flag) {
         int index = -1;
-        int min = 0;
-        for (int i = 0; i < items.size(); i++) {
-            QueryResult item = items.get(i);
-            int size = item.mArtist.length() + item.mTitle.length();
-            if (size < min || min == 0) {
-                min = size;
-                index = i;
+        int limit = 0;
+        if (flag == DOWNLLOAD_SHORTEST_NAME) {
+            for (int i = 0; i < items.size(); i++) {
+                QueryResult item = items.get(i);
+                int size = item.mArtist.length() + item.mTitle.length();
+                if (size < limit || limit == 0) {
+                    limit = size;
+                    index = i;
+                }
+            }
+        } else if (flag == DOWNLLOAD_CONTAIN_NAME) {
+            for (int i = 0; i < items.size(); i++) {
+                QueryResult item = items.get(i);
+                int size = item.mArtist.length() + item.mTitle.length();
+                if (item.mArtist.contains("中日") || item.mTitle.contains("中日")) {
+                    index = i;
+                    break;
+                }
+                if (size > limit || limit == 0) {
+                    limit = size;
+                    index = i;
+                }
             }
         }
         if (index >= 0) {
