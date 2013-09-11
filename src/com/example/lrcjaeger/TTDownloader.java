@@ -136,7 +136,7 @@ public class TTDownloader {
         return false;
     }
     
-    public static int DOWNLLOAD_SHORTEST_NAME = 1;
+    public static int DOWNLLOAD_SHORTEST_NAME = 1; // FIXME
     public static boolean download(ArrayList<QueryResult> items, String lrcPath, int flag) {
         int index = -1;
         int min = 0;
