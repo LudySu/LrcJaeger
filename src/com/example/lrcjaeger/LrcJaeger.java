@@ -1,5 +1,6 @@
 package com.example.lrcjaeger;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -9,10 +10,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -21,15 +26,18 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-// TODO: 换ui，手动搜索下载，×下载过滤规则，歌词删除，×歌词编辑，×选择服务器
+// TODO: 手动搜索下载，下载过滤规则，×歌词编辑，×选择服务器，OO重构，×文件夹过滤
 
 public class LrcJaeger extends Activity {
     private static final String TAG = "LrcJaeger";
     private static final String[] PROJECTION = new String[] {"_id", "_data", "artist", "title"};
     
     private static final int MSG_QUERY_DB = 1;
-    private static final int MSG_DOWNLOAD_ALL = 2;
-    private static final int MSG_UPDATE_LRC_ICON = 3;
+    private static final int MSG_DOWNLOAD_ALL = 10;
+    private static final int MSG_DOWNLOAD_ITEM = 11;
+    private static final int MSG_UPDATE_LRC_ICON_ALL = 20;
+    private static final int MSG_UPDATE_LRC_ICON = 21;
+    
     
     private ListView mListView;
     private SongItemAdapter mAdapter;
@@ -45,7 +53,14 @@ public class LrcJaeger extends Activity {
         mListView = (ListView) findViewById(R.id.lv_song_items);
         mAdapter = new SongItemAdapter(this, new ArrayList<SongItem>());
         mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(null);
+        
+        final GestureDetector gestureDetector = new GestureDetector(this, new MyGestureDetector());
+        View.OnTouchListener gestureListener = new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        };
+        mListView.setOnTouchListener(gestureListener);
         
         // initial song list
         mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
@@ -95,6 +110,9 @@ public class LrcJaeger extends Activity {
             mDownAllButton.expandActionView();
             mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
             break;
+        case R.id.menu_download_rules:
+            // TODO setting
+            break;
 
         default:
             break;
@@ -102,11 +120,72 @@ public class LrcJaeger extends Activity {
         return true;
     } 
     
-    public OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+    private class MyGestureDetector extends SimpleOnGestureListener {
+        private final int REL_SWIPE_MIN_DISTANCE;
+        private final int REL_SWIPE_MAX_OFF_PATH;
+        private final int REL_SWIPE_THRESHOLD_VELOCITY;
+
+        public MyGestureDetector() {
+            super();
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            REL_SWIPE_MIN_DISTANCE = (int) (120.0f * dm.densityDpi / 160.0f + 0.5);
+            REL_SWIPE_MAX_OFF_PATH = (int) (250.0f * dm.densityDpi / 160.0f + 0.5);
+            REL_SWIPE_THRESHOLD_VELOCITY = (int) (200.0f * dm.densityDpi / 160.0f + 0.5);
         }
-    };
+
+        private void onListViewItemClicked(int position) {
+            Log.v(TAG, "on item click at pos " + position);
+            SongItem item = mAdapter.getItem(position);
+            item.updateStatus();
+            if (!item.isHasLrc()) {
+                Message msg = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEM, item);
+                mUiHandler.sendMessage(msg);
+            } else {
+                // TODO search by hand
+            }
+        }
+
+        private void onFling(int position) {
+            Log.v(TAG, "on item fling at pos " + position);
+            SongItem item = mAdapter.getItem(position);
+            item.updateStatus();
+            if (item.isHasLrc()) {
+                // delete lrc file
+                File lrc = new File(item.getLrcPath());
+                boolean ret = lrc.delete();
+                if (!ret) {
+                    Toast.makeText(LrcJaeger.this, R.string.toast_delete_err, Toast.LENGTH_SHORT).show();
+                } else {
+                    // TODO: only update single icon
+                    mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                }
+            }
+        }
+
+        // Detect a single-click and call my own handler.
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            int pos = mListView.pointToPosition((int) e.getX(), (int) e.getY());
+            onListViewItemClicked(pos);
+            return false;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH) {
+                return false;
+            }
+            if (Math.abs(e1.getX() - e2.getX()) > REL_SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) {
+                int pos = mListView.pointToPosition((int) e1.getX(), (int) e1.getY());
+                onFling(pos);
+            }
+            return false;
+        }
+
+    }
     
     private Handler mUiHandler = new Handler() {
         @Override
@@ -117,7 +196,8 @@ public class LrcJaeger extends Activity {
                 mAdapter.clear();
                 Cursor c = null;
                 try {
-                    c = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, PROJECTION, null, null, "title_key");
+                    c = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, PROJECTION, 
+                            "is_music=?", new String[]{"1"}, "title_key");
                     if (c != null && c.moveToFirst()) {
                         do {
                             String path = c.getString(1);
@@ -133,22 +213,33 @@ public class LrcJaeger extends Activity {
                 }
                 break;
             case MSG_DOWNLOAD_ALL:
-                ArrayList<SongItem> list = new ArrayList<SongItem>();
+                ArrayList<SongItem> listAll = new ArrayList<SongItem>();
                 for (int i = 0; i < mAdapter.getCount(); i++) {
                     SongItem item = mAdapter.getItem(i);
                     if (!item.isHasLrc()) {
-                        list.add(item);
+                        listAll.add(item);
                     }
                 }
-                if (list.size() > 0) {
+                if (listAll.size() > 0) {
                     mTask = new DownloadTask();
-                    mTask.execute(list.toArray(new SongItem[1]));
+                    mTask.execute(listAll.toArray(new SongItem[1]));
                 }
                 break;
+            case MSG_DOWNLOAD_ITEM:
+                SongItem item = (SongItem) msg.obj;
+                if (item == null) {
+                    Log.w(TAG, "no item found in message");
+                    return;
+                }
+                DownloadTask task = new DownloadTask();
+                task.execute(new SongItem[] {item});
+                break;
             case MSG_UPDATE_LRC_ICON:
+                break;
+            case MSG_UPDATE_LRC_ICON_ALL:
                 for (int i = 0; i < mAdapter.getCount(); i++) {
-                    SongItem item = mAdapter.getItem(i);
-                    item.updateStatus();
+                    SongItem it = mAdapter.getItem(i);
+                    it.updateStatus();
                 }
                 mAdapter.notifyDataSetChanged();
                 break;
@@ -159,9 +250,9 @@ public class LrcJaeger extends Activity {
         }
     };
     
-    private class DownloadTask extends AsyncTask<SongItem, Integer, Boolean> {
+    private class DownloadTask extends AsyncTask<SongItem, Integer, Integer> {
         @Override
-        protected Boolean doInBackground(SongItem... list) { // on an independent thread
+        protected Integer doInBackground(SongItem... list) { // on an independent thread
             if (list == null || list.length <= 0) {
                 Log.w(TAG, "items null");
             }
@@ -180,10 +271,12 @@ public class LrcJaeger extends Activity {
                             TTDownloader.DOWNLLOAD_SHORTEST_NAME);
                     downloaded = result ? downloaded + 1: downloaded;   
                 }
-                publishProgress(100 * count / total);
+                if (total > 1) {
+                    publishProgress(100 * count / total);
+                }
             }
             Log.d(TAG, "downloaded " + downloaded + " of " + total + " items");
-            return true;
+            return total;
         }
         
         @Override
@@ -193,12 +286,12 @@ public class LrcJaeger extends Activity {
 
 
         @Override
-        protected void onPostExecute(Boolean result) {
-            if (mDownAllButton != null) {
+        protected void onPostExecute(Integer total) {
+            if (mDownAllButton != null && total > 1) {
                 mDownAllButton.collapseActionView();
                 mDownAllButton.setActionView(null);
             }
-            mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON);
+            mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
         }
     };
 

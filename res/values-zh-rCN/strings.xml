@@ -4,7 +4,9 @@
     <string name="app_name">歌词猎手</string>
     <string name="lrc_icon">词</string>
     <string name="menu_downall">全部下载</string>
+    <string name="menu_download_rules">下载规则</string>
     
     <string name="toast_no_network_connection">无 WiFi 或 3G 网络连接</string>
+    <string name="toast_delete_err">删除歌词文件失败</string>
 
 </resources>
