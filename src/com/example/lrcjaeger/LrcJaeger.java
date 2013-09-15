@@ -26,7 +26,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-// TODO: 手动搜索下载，下载过滤规则，×歌词编辑，×选择服务器，OO重构，×文件夹过滤
+// TODO: 手动搜索下载，下载过滤规则，×歌词编辑，×选择服务器，OO重构，×手动添加文件夹
 
 public class LrcJaeger extends Activity {
     private static final String TAG = "LrcJaeger";
@@ -37,6 +37,7 @@ public class LrcJaeger extends Activity {
     private static final int MSG_DOWNLOAD_ITEM = 11;
     private static final int MSG_UPDATE_LRC_ICON_ALL = 20;
     private static final int MSG_UPDATE_LRC_ICON = 21;
+    private static final int MSG_REMOVE_ITEM_FROM_LIST = 31;
     
     
     private ListView mListView;
@@ -140,17 +141,17 @@ public class LrcJaeger extends Activity {
             SongItem item = mAdapter.getItem(position);
             item.updateStatus();
             if (!item.isHasLrc()) {
+                // TODO search by hand
                 Message msg = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEM, item);
                 mUiHandler.sendMessage(msg);
             } else {
-                // TODO search by hand
+                // TODO open lrc
             }
         }
 
-        private void onFling(int position) {
+        private void deleteLrc(int position) {
             Log.v(TAG, "on item fling at pos " + position);
             SongItem item = mAdapter.getItem(position);
-            item.updateStatus();
             if (item.isHasLrc()) {
                 // delete lrc file
                 File lrc = new File(item.getLrcPath());
@@ -163,8 +164,12 @@ public class LrcJaeger extends Activity {
                 }
             }
         }
+        
+        private void removeListItem(int position) {
+            Message msg = mUiHandler.obtainMessage(MSG_REMOVE_ITEM_FROM_LIST, position, 0);
+            mUiHandler.sendMessage(msg);
+        }
 
-        // Detect a single-click and call my own handler.
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             int pos = mListView.pointToPosition((int) e.getX(), (int) e.getY());
@@ -180,7 +185,13 @@ public class LrcJaeger extends Activity {
             if (Math.abs(e1.getX() - e2.getX()) > REL_SWIPE_MIN_DISTANCE
                     && Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) {
                 int pos = mListView.pointToPosition((int) e1.getX(), (int) e1.getY());
-                onFling(pos);
+                if (e1.getX() < e2.getX()) {
+                    // fling left TODO animation
+                    removeListItem(pos);
+                } else {
+                    // fling right
+                    deleteLrc(pos);
+                }
             }
             return false;
         }
@@ -242,6 +253,10 @@ public class LrcJaeger extends Activity {
                     it.updateStatus();
                 }
                 mAdapter.notifyDataSetChanged();
+                break;
+            case MSG_REMOVE_ITEM_FROM_LIST:
+                int pos = msg.arg1;
+                mAdapter.remove(mAdapter.getItem(pos));
                 break;
             default:
                 Log.w(TAG, "Unknown message");
