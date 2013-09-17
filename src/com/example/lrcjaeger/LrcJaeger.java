@@ -3,12 +3,9 @@ package com.example.lrcjaeger;
 import java.io.File;
 import java.util.ArrayList;
 
-import com.vivo.upnpserver.Constants;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -242,19 +239,33 @@ public class LrcJaeger extends Activity {
                     }
                 }
                 if (listAll.size() > 0) {
-                    mTask = new DownloadTask();
+                    mTask = new DownloadTask(new DownloadTask.EventListener() {
+                        @Override
+                        public void onFinish(int downloaded) {
+                            if (mDownAllButton != null) {
+                                mDownAllButton.collapseActionView();
+                                mDownAllButton.setActionView(null);
+                            }
+                            mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                        }
+
+                        @Override
+                        public void onProgressUpdate(int progress) {
+                            mProgressBar.setProgress(progress);
+                        }
+                    });
                     mTask.execute(listAll.toArray(new SongItem[1]));
                 }
                 break;
-            case MSG_DOWNLOAD_ITEM:
-                SongItem item = (SongItem) msg.obj;
-                if (item == null) {
-                    Log.w(TAG, "no item found in message");
-                    return;
-                }
-                DownloadTask task = new DownloadTask();
-                task.execute(new SongItem[] {item});
-                break;
+//            case MSG_DOWNLOAD_ITEM:
+//                SongItem item = (SongItem) msg.obj;
+//                if (item == null) {
+//                    Log.w(TAG, "no item found in message");
+//                    return;
+//                }
+//                DownloadTask task = new DownloadTask(null);
+//                task.execute(new SongItem[] {item});
+//                break;
             case MSG_UPDATE_LRC_ICON:
                 break;
             case MSG_UPDATE_LRC_ICON_ALL:
@@ -272,51 +283,6 @@ public class LrcJaeger extends Activity {
                 Log.w(TAG, "Unknown message");
                 break;
             }
-        }
-    };
-    
-    private class DownloadTask extends AsyncTask<SongItem, Integer, Integer> {
-        @Override
-        protected Integer doInBackground(SongItem... list) { // on an independent thread
-            if (list == null || list.length <= 0) {
-                Log.w(TAG, "items null");
-            }
-            int count = 0;
-            int downloaded = 0;
-            int total = list.length;
-            for (SongItem item : list) {
-                if (isCancelled()) {
-                    Log.i(TAG, "download task is canceled, " + (total - count) + " items left");
-                    break;
-                }
-                count++;
-                ArrayList<QueryResult> lrcs = TTDownloader.query(item.getArtist(), item.getTitle());
-                if (lrcs != null && lrcs.size() > 0) {
-                    boolean result = TTDownloader.download(lrcs, item.getLrcPath(),
-                            TTDownloader.DOWNLLOAD_SHORTEST_NAME);
-                    downloaded = result ? downloaded + 1: downloaded;   
-                }
-                if (total > 1) {
-                    publishProgress(100 * count / total);
-                }
-            }
-            Log.d(TAG, "downloaded " + downloaded + " of " + total + " items");
-            return total;
-        }
-        
-        @Override
-        protected void onProgressUpdate(Integer...progress) {
-            mProgressBar.setProgress(progress[0]);
-        }
-
-
-        @Override
-        protected void onPostExecute(Integer total) {
-            if (mDownAllButton != null && total > 1) {
-                mDownAllButton.collapseActionView();
-                mDownAllButton.setActionView(null);
-            }
-            mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
         }
     };
 
