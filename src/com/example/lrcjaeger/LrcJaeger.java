@@ -3,7 +3,10 @@ package com.example.lrcjaeger;
 import java.io.File;
 import java.util.ArrayList;
 
+import com.vivo.upnpserver.Constants;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,9 +22,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -121,7 +121,15 @@ public class LrcJaeger extends Activity {
         return true;
     } 
     
-
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+//        if (requestCode == Constants.INTENT_SET_SHARE_FOLDER && resultCode == Activity.RESULT_OK) {
+//            String absolutePath = data.getData().getPath();
+//        }
+        
+//      Message msg = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEM, item);
+//      mUiHandler.sendMessage(msg);
+    }
 
     private class MyGestureDetector extends SimpleOnGestureListener {
         private final int REL_SWIPE_MIN_DISTANCE;
@@ -140,13 +148,15 @@ public class LrcJaeger extends Activity {
             Log.v(TAG, "on item click at pos " + position);
             SongItem item = mAdapter.getItem(position);
             item.updateStatus();
-            if (!item.isHasLrc()) {
-                // TODO search by hand
-                Message msg = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEM, item);
-                mUiHandler.sendMessage(msg);
-            } else {
-                // TODO open lrc
+
+            if (!Utils.isNetworkAvailable(LrcJaeger.this)) {
+                Toast.makeText(LrcJaeger.this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "no network connection");
+                return;
             }
+            
+            Intent i = new Intent(LrcJaeger.this, SearchDialog.class);
+            LrcJaeger.this.startActivity(i);
         }
 
         private void deleteLrc(int position) {

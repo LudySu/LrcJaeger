@@ -8,5 +8,8 @@
     
     <string name="toast_no_network_connection">No WiFi or 3G network connection</string>
     <string name="toast_delete_err">Delete lrc file failed</string>
-
+    
+    <string name="search_dialog">Search lyrics</string>
+    <string name="et_search_hint_title">Title</string>
+    <string name="et_search_hint_artist">Artist(optional)</string>
 </resources>
