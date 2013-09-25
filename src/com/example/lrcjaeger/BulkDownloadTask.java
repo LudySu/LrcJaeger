@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class DownloadTask extends AsyncTask<SongItem, Integer, Integer> {
+public class BulkDownloadTask extends AsyncTask<SongItem, Integer, Integer> {
     private static final String TAG = "LrcJaeger/Download";
     
     private EventListener mListener;
@@ -15,7 +15,7 @@ public class DownloadTask extends AsyncTask<SongItem, Integer, Integer> {
         public void onProgressUpdate(int progress);
     }
     
-    public DownloadTask(EventListener l) {
+    public BulkDownloadTask(EventListener l) {
         mListener = l;
     }
     

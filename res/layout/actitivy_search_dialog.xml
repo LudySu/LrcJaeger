@@ -1,28 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#FAFAFA"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
     <EditText
         android:id="@+id/et_title"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"
-        android:hint="@string/et_search_hint_title" />
+        android:hint="@string/et_search_hint_title"
+        android:imeOptions="actionNext"
+        android:inputType="text" >
+        <requestFocus />
+    </EditText>
     
     <EditText
         android:id="@+id/et_artist"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="16dp"
-        android:hint="@string/et_search_hint_artist"/>
+        android:layout_margin="8dp"
+        android:hint="@string/et_search_hint_artist"
+        android:imeOptions="actionDone"
+        android:inputType="text" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,6 +34,7 @@
 
         <Button
             android:id="@+id/btn_ok"
+            android:layout_margin="8dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -37,11 +42,18 @@
 
         <Button
             android:id="@+id/btn_cancel"
+            android:layout_margin="8dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@android:string/cancel" />
-
     </LinearLayout>
+    
+    <ListView
+        android:id="@+id/lv_query_items" 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" 
+        android:paddingTop="3dip"
+        android:clickable="true" />
     
 </LinearLayout>

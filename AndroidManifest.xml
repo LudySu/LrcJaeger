@@ -27,7 +27,7 @@
         </activity>
         
         <activity
-            android:theme="@android:style/Theme.Dialog"
+            android:windowSoftInputMode="stateAlwaysVisible"
             android:name="com.example.lrcjaeger.SearchDialog"
             android:excludeFromRecents="true"
             android:label="@string/search_dialog" >

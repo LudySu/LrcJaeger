@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -41,7 +42,7 @@ public class LrcJaeger extends Activity {
     private SongItemAdapter mAdapter;
     private MenuItem mDownAllButton;
     private ProgressBar mProgressBar;
-    private DownloadTask mTask;
+    private BulkDownloadTask mTask;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +69,8 @@ public class LrcJaeger extends Activity {
     protected void onResume() {
         super.onResume();
         
-        // update song list
-        mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
+        // update lrc icons
+        mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
     }
     
     @Override
@@ -120,12 +121,8 @@ public class LrcJaeger extends Activity {
     
     @Override
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-//        if (requestCode == Constants.INTENT_SET_SHARE_FOLDER && resultCode == Activity.RESULT_OK) {
-//            String absolutePath = data.getData().getPath();
-//        }
-        
-//      Message msg = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEM, item);
-//      mUiHandler.sendMessage(msg);
+        // update lrc icons
+        mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
     }
 
     private class MyGestureDetector extends SimpleOnGestureListener {
@@ -153,6 +150,9 @@ public class LrcJaeger extends Activity {
             }
             
             Intent i = new Intent(LrcJaeger.this, SearchDialog.class);
+            i.setData(Uri.fromFile(new File(item.getPath())));
+            i.putExtra("title", item.getTitle());
+            i.putExtra("artist", item.getArtist());
             LrcJaeger.this.startActivity(i);
         }
 
@@ -239,7 +239,7 @@ public class LrcJaeger extends Activity {
                     }
                 }
                 if (listAll.size() > 0) {
-                    mTask = new DownloadTask(new DownloadTask.EventListener() {
+                    mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
                         @Override
                         public void onFinish(int downloaded) {
                             if (mDownAllButton != null) {

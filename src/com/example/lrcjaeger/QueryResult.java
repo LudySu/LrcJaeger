@@ -15,4 +15,9 @@ public class QueryResult {
         mArtist = artist;
         mTitle = title;
     }
+    
+    @Override 
+    public String toString() {
+        return mTitle + " - " + mArtist;
+    }
 }

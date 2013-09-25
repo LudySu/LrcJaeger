@@ -117,7 +117,7 @@ public class TTDownloader {
             e.printStackTrace();
         }
         
-        return null;
+        return "";
     }
     
     public static boolean download(QueryResult item, String lrcPath) {

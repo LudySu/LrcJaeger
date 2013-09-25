@@ -55,4 +55,9 @@ public class SongItem {
         }
         return null;
     }
+    
+    @Override
+    public String toString() {
+        return "[title = " + mTitle + ", artist = " + mArtist + ", path = " + mPath + "]";
+    }
 }
