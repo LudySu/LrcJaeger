@@ -1,4 +1,4 @@
-package com.example.lrcjaeger;
+package orz.ludysu.lrcjaeger;
 
 import java.io.File;
 
@@ -43,6 +43,14 @@ public class SongItem {
         boolean changed = hasLrc == mHasLrc;
         mHasLrc = hasLrc;
         return changed;
+    }
+    
+    public void setArtist(String artist) {
+        mArtist = artist;
+    }
+    
+    public void setTitle(String title) {
+        mTitle = title;
     }
 
     /** 

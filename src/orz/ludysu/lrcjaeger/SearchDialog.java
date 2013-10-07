@@ -1,6 +1,8 @@
-package com.example.lrcjaeger;
+package orz.ludysu.lrcjaeger;
 
 import java.util.ArrayList;
+
+import orz.ludysu.lrcjaeger.R;
 
 import android.app.Activity;
 import android.content.Context;
@@ -30,7 +32,7 @@ public class SearchDialog extends Activity {
     private static final int MSG_QUERY = 1;
     private static final int MSG_DOWNLOAD = 2;
     
-    private MyHandler mHandler;
+    private BackgroundHandler mHandler;
     private SongItem mSongItem;
     private ListView mListView;
 
@@ -48,7 +50,7 @@ public class SearchDialog extends Activity {
         
         HandlerThread ht = new HandlerThread("single-download");
         ht.start();
-        mHandler = new MyHandler(ht.getLooper());
+        mHandler = new BackgroundHandler(ht.getLooper());
         
         final EditText titleEt = (EditText) findViewById(R.id.et_title);
         titleEt.setText(mSongItem.getTitle());
@@ -69,6 +71,8 @@ public class SearchDialog extends Activity {
             public void onClick(View arg0) {
                 String title = titleEt.getText().toString();
                 String artist = artistEt.getText().toString();
+                mSongItem.setTitle(title);
+                mSongItem.setArtist(artist);
                 Log.v(TAG, "search title " + title + ", artist " + artist);
                 
                 if (!title.isEmpty()) {
@@ -106,7 +110,7 @@ public class SearchDialog extends Activity {
                 mListView.setAdapter(adapter);
                 break;
             case MSG_DOWNLOAD:
-                Toast.makeText(SearchDialog.this, "Donwload OK", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SearchDialog.this, R.string.toast_download_ok, Toast.LENGTH_SHORT).show();
                 finish();
                 break;
             default:
@@ -115,8 +119,8 @@ public class SearchDialog extends Activity {
         }
     };
     
-    private class MyHandler extends Handler {
-        public MyHandler(Looper l) {
+    private class BackgroundHandler extends Handler {
+        public BackgroundHandler(Looper l) {
             super(l);
         }
         
@@ -125,9 +129,10 @@ public class SearchDialog extends Activity {
             switch (msg.what) {
             case MSG_QUERY:
                 mQueryResult = TTDownloader.query(mSongItem.getArtist(), mSongItem.getTitle());
-                if (mQueryResult != null && mQueryResult.size() > 0) {
-                    mUiHandler.sendEmptyMessage(MSG_QUERY);
+                if (mQueryResult.size() == 0) {
+                    Toast.makeText(SearchDialog.this, R.string.toast_lrc_not_found, Toast.LENGTH_SHORT).show();
                 }
+                mUiHandler.sendEmptyMessage(MSG_QUERY);
                 break;
             case MSG_DOWNLOAD:
                 int position = msg.arg1;

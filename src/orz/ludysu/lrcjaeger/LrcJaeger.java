@@ -1,7 +1,9 @@
-package com.example.lrcjaeger;
+package orz.ludysu.lrcjaeger;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import orz.ludysu.lrcjaeger.R;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,7 +26,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-// TODO: 手动搜索下载，下载过滤规则，×歌词编辑，×选择服务器，OO重构，×手动添加文件夹
+// TODO: 歌词预览，下载超时，x下载过滤规则，×歌词编辑，选择服务器，×手动添加文件夹
 
 public class LrcJaeger extends Activity {
     private static final String TAG = "LrcJaeger";
@@ -105,13 +107,10 @@ public class LrcJaeger extends Activity {
             }
             mDownAllButton = item;
             mProgressBar = (ProgressBar)getLayoutInflater().inflate(R.layout.progressbar, null);
-            mDownAllButton.setActionView(mProgressBar);
-            mDownAllButton.expandActionView();
             mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
             break;
-        case R.id.menu_download_rules:
-            // TODO setting
-            break;
+//        case R.id.menu_download_rules:
+//            break;
 
         default:
             break;
@@ -166,7 +165,6 @@ public class LrcJaeger extends Activity {
                 if (!ret) {
                     Toast.makeText(LrcJaeger.this, R.string.toast_delete_err, Toast.LENGTH_SHORT).show();
                 } else {
-                    // TODO: only update single icon
                     mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
                 }
             }
@@ -239,6 +237,9 @@ public class LrcJaeger extends Activity {
                     }
                 }
                 if (listAll.size() > 0) {
+                    mDownAllButton.setActionView(mProgressBar);
+                    mDownAllButton.expandActionView();
+                    
                     mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
                         @Override
                         public void onFinish(int downloaded) {

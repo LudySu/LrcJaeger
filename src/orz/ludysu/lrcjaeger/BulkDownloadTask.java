@@ -1,4 +1,4 @@
-package com.example.lrcjaeger;
+package orz.ludysu.lrcjaeger;
 
 import java.util.ArrayList;
 

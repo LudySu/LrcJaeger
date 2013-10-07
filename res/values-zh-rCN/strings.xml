@@ -12,4 +12,6 @@
     <string name="search_dialog">搜索歌词</string>
     <string name="et_search_hint_title">标题</string>
     <string name="et_search_hint_artist">艺术家（可不填）</string>
+    <string name="toast_download_ok">下载成功</string>
+    <string name="toast_lrc_not_found">未找到歌词</string>
 </resources>

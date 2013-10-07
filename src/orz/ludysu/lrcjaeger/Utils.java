@@ -1,4 +1,4 @@
-package com.example.lrcjaeger;
+package orz.ludysu.lrcjaeger;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;

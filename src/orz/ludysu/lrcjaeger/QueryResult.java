@@ -1,4 +1,4 @@
-package com.example.lrcjaeger;
+package orz.ludysu.lrcjaeger;
 
 public class QueryResult {
     public static final String ITEM_LRC = "lrc";

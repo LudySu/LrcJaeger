@@ -12,4 +12,6 @@
     <string name="search_dialog">Search lyrics</string>
     <string name="et_search_hint_title">Title</string>
     <string name="et_search_hint_artist">Artist(optional)</string>
+    <string name="toast_download_ok">Download OK</string>
+    <string name="toast_lrc_not_found">Lyrics not found</string>
 </resources>

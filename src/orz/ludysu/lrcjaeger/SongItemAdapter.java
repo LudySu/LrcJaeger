@@ -1,11 +1,12 @@
-package com.example.lrcjaeger;
+package orz.ludysu.lrcjaeger;
 
 
 
 import java.util.ArrayList;
 
+import orz.ludysu.lrcjaeger.R;
+
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +38,7 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         TextView artist = (TextView) convertView.findViewById(R.id.tv_song_artist);
         artist.setText(song.getArtist());
 
-        int color = song.isHasLrc() ? Color.BLACK : Color.LTGRAY;
+        int color = song.isHasLrc() ? Color.argb(255, 0, 162, 232) : Color.LTGRAY;
         TextView hasLrc = (TextView) convertView.findViewById(R.id.tv_has_lrc);
         hasLrc.setTextColor(color);
         
