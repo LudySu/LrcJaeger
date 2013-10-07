@@ -20,6 +20,13 @@ LrcJaeger - A lyrics downloader for Android using Qianqian Jingting's server, wh
 
 ## Usage
 
-Import the source folder into Eclipse and build and run.
+Import the source folder into Eclipse and build and run. Or you can download the binary APK file below and get it run in your Android device right now.
 
-把源码目录导入 Eclipse 并编译运行。
+把源码目录导入 Eclipse 并编译运行。或者下载下面的APK文件，可立即在你的Android设备上运行。
+
+## Download
+
+v0.10-beta release [APK download](https://github.com/LudySu/LrcJaeger/releases/download/v0.10-beta/LrcJaeger.apk)
+
+v0.10-beta 发布 [APK 下载](https://github.com/LudySu/LrcJaeger/releases/download/v0.10-beta/LrcJaeger.apk)
+
