@@ -1,11 +1,17 @@
 package orz.ludysu.lrcjaeger;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import orz.ludysu.lrcjaeger.R;
+import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -22,11 +28,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-// TODO: 歌词预览，下载超时，x下载过滤规则，×歌词编辑，选择服务器，×手动添加文件夹
 
 public class LrcJaeger extends Activity {
     private static final String TAG = "LrcJaeger";
@@ -53,6 +58,24 @@ public class LrcJaeger extends Activity {
         
         mListView = (ListView) findViewById(R.id.lv_song_items);
         mAdapter = new SongItemAdapter(this, new ArrayList<SongItem>());
+        mAdapter.setLrcClickListener(new OnLrcClickListener() {
+            @Override
+            public void OnLrcClick(int position) {
+                SongItem item = mAdapter.getItem(position);
+                if (item.isHasLrc()) {
+                    String lrc = "Cannot read file: IO Error";
+                    try {
+                        lrc = Utils.readFile(item.getLrcPath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LrcJaeger.this);
+                    builder.setMessage(lrc);
+                    builder.create().show();
+                }
+            }
+        });
         mListView.setAdapter(mAdapter);
         
         final GestureDetector gestureDetector = new GestureDetector(this, new MyGestureDetector());
