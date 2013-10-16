@@ -1,11 +1,10 @@
 package orz.ludysu.lrcjaeger;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 import orz.ludysu.lrcjaeger.R;
 import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
@@ -28,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -78,13 +76,51 @@ public class LrcJaeger extends Activity {
         });
         mListView.setAdapter(mAdapter);
         
-        final GestureDetector gestureDetector = new GestureDetector(this, new MyGestureDetector());
-        View.OnTouchListener gestureListener = new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-        };
-        mListView.setOnTouchListener(gestureListener);
+//        final GestureDetector gestureDetector = new GestureDetector(this, new MyGestureDetector());
+//        View.OnTouchListener gestureListener = new View.OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return gestureDetector.onTouchEvent(event);
+//            }
+//        };
+//        mListView.setOnTouchListener(gestureListener);
+        
+        // Create a ListView-specific touch listener. ListViews are given special treatment because
+        // by default they handle touches for their list items... i.e. they're in charge of drawing
+        // the pressed state (the list selector), handling list item clicks, etc.
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
+                mListView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+//                        for (int position : reverseSortedPositions) {
+//                            mAdapter.remove(mAdapter.getItem(position));
+//                        }
+//                        mAdapter.notifyDataSetChanged();
+                    }
+                    
+                    private void deleteLrc(int position) {
+                        Log.v(TAG, "on item fling at pos " + position);
+                        SongItem item = mAdapter.getItem(position);
+                        if (item.isHasLrc()) {
+                            // delete lrc file
+                            File lrc = new File(item.getLrcPath());
+                            boolean ret = lrc.delete();
+                            if (!ret) {
+                                Toast.makeText(LrcJaeger.this, R.string.toast_delete_err, Toast.LENGTH_SHORT).show();
+                            } else {
+                                mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                            }
+                        }
+                    }
+                });
+        mListView.setOnTouchListener(touchListener);
+        // Setting this scroll listener is required to ensure that during ListView scrolling,
+        // we don't look for swipes.
+        mListView.setOnScrollListener(touchListener.makeScrollListener());
         
         // initial song list
         mUiHandler.sendEmptyMessage(MSG_QUERY_DB);

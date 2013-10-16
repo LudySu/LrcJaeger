@@ -71,16 +71,14 @@ public class TTDownloader {
     }
     
     private static String filterString(String str) {
-        // ×ªĞ¡Ğ´
         str = str.toLowerCase();
-        // È¥À¨ºÅ£¬´óÖĞĞ¡»¹ÓĞÈ«½ÇµÄĞ¡À¨ºÅ
-        str = str.replaceAll("[\\[\\]{}\\(\\)£¨£©]+", "");
-        // È¥³ı°ë½ÇÌØÊâ·ûºÅ£¬¿Õ¸ñ£¬¶ººÅ£¬etc
+        // å»æ‹¬å·ï¼Œå¤§ä¸­å°è¿˜æœ‰å…¨è§’çš„å°æ‹¬å·
+        str = str.replaceAll("[\\[\\]{}\\(\\)ï¼ˆï¼‰]+", "");
+        // å»é™¤åŠè§’ç‰¹æ®Šç¬¦å·ï¼Œç©ºæ ¼ï¼Œé€—å·ï¼Œetc
         str = str.replaceAll("[\\s\\/:\\@\\`\\~\\-,\\.]+", "");
-        // È¥³ıÈ«½ÇÌØÊâ·ûºÅ
+        // å»é™¤å…¨è§’ç‰¹æ®Šç¬¦å·
         str = str.replaceAll("[\u2014\u2018\u201c\u2026\u3001\u3002\u300a\u300b\u300e\u300f\u3010\u3011" + 
                     "\u30fb\uff01\uff08\uff09\uff0c\uff1a\uff1b\uff1f\uff5e\uffe5]+", "");
-        // TODO¡¡¼ò·±×ª»»
         return str;
     }
     
@@ -137,7 +135,7 @@ public class TTDownloader {
     }
     
     public static int DOWNLLOAD_SHORTEST_NAME = 1; // FIXME
-    public static int DOWNLLOAD_CONTAIN_NAME = 2; // contains zhongri, or longest name
+    public static int DOWNLLOAD_CONTAIN_NAME = 2;
     public static boolean download(ArrayList<QueryResult> items, String lrcPath, int flag) {
         int index = -1;
         int limit = 0;
@@ -154,7 +152,7 @@ public class TTDownloader {
             for (int i = 0; i < items.size(); i++) {
                 QueryResult item = items.get(i);
                 int size = item.mArtist.length() + item.mTitle.length();
-                if (item.mArtist.contains("ÖĞÈÕ") || item.mTitle.contains("ÖĞÈÕ")) {
+                if (item.mArtist.contains("ä¸­æ—¥") || item.mTitle.contains("ä¸­æ—¥")) {
                     index = i;
                     break;
                 }
