@@ -76,14 +76,6 @@ public class LrcJaeger extends Activity {
         });
         mListView.setAdapter(mAdapter);
         
-//        final GestureDetector gestureDetector = new GestureDetector(this, new MyGestureDetector());
-//        View.OnTouchListener gestureListener = new View.OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                return gestureDetector.onTouchEvent(event);
-//            }
-//        };
-//        mListView.setOnTouchListener(gestureListener);
-        
         // Create a ListView-specific touch listener. ListViews are given special treatment because
         // by default they handle touches for their list items... i.e. they're in charge of drawing
         // the pressed state (the list selector), handling list item clicks, etc.
@@ -95,11 +87,18 @@ public class LrcJaeger extends Activity {
                     }
 
                     @Override
-                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-//                        for (int position : reverseSortedPositions) {
-//                            mAdapter.remove(mAdapter.getItem(position));
-//                        }
-//                        mAdapter.notifyDataSetChanged();
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions
+                            , boolean dismissRight) {
+                        if (dismissRight) {
+                            for (int position : reverseSortedPositions) {
+                                mAdapter.remove(mAdapter.getItem(position));
+                            }
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            for (int position : reverseSortedPositions) {
+                                deleteLrc(position);
+                            }
+                        }
                     }
                     
                     private void deleteLrc(int position) {
@@ -115,6 +114,25 @@ public class LrcJaeger extends Activity {
                                 mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
                             }
                         }
+                    }
+
+                    @Override
+                    public void onSingleTapUp(int position) {
+                        Log.v(TAG, "on item click at pos " + position);
+                        SongItem item = mAdapter.getItem(position);
+                        item.updateStatus();
+
+                        if (!Utils.isNetworkAvailable(LrcJaeger.this)) {
+                            Toast.makeText(LrcJaeger.this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "no network connection");
+                            return;
+                        }
+                        
+                        Intent i = new Intent(LrcJaeger.this, SearchDialog.class);
+                        i.setData(Uri.fromFile(new File(item.getPath())));
+                        i.putExtra("title", item.getTitle());
+                        i.putExtra("artist", item.getArtist());
+                        LrcJaeger.this.startActivity(i);
                     }
                 });
         mListView.setOnTouchListener(touchListener);
@@ -181,85 +199,6 @@ public class LrcJaeger extends Activity {
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         // update lrc icons
         mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
-    }
-
-    private class MyGestureDetector extends SimpleOnGestureListener {
-        private final int REL_SWIPE_MIN_DISTANCE;
-        private final int REL_SWIPE_MAX_OFF_PATH;
-        private final int REL_SWIPE_THRESHOLD_VELOCITY;
-
-        public MyGestureDetector() {
-            super();
-            DisplayMetrics dm = getResources().getDisplayMetrics();
-            REL_SWIPE_MIN_DISTANCE = (int) (120.0f * dm.densityDpi / 160.0f + 0.5);
-            REL_SWIPE_MAX_OFF_PATH = (int) (250.0f * dm.densityDpi / 160.0f + 0.5);
-            REL_SWIPE_THRESHOLD_VELOCITY = (int) (200.0f * dm.densityDpi / 160.0f + 0.5);
-        }
-
-        private void onListViewItemClicked(int position) {
-            Log.v(TAG, "on item click at pos " + position);
-            SongItem item = mAdapter.getItem(position);
-            item.updateStatus();
-
-            if (!Utils.isNetworkAvailable(LrcJaeger.this)) {
-                Toast.makeText(LrcJaeger.this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "no network connection");
-                return;
-            }
-            
-            Intent i = new Intent(LrcJaeger.this, SearchDialog.class);
-            i.setData(Uri.fromFile(new File(item.getPath())));
-            i.putExtra("title", item.getTitle());
-            i.putExtra("artist", item.getArtist());
-            LrcJaeger.this.startActivity(i);
-        }
-
-        private void deleteLrc(int position) {
-            Log.v(TAG, "on item fling at pos " + position);
-            SongItem item = mAdapter.getItem(position);
-            if (item.isHasLrc()) {
-                // delete lrc file
-                File lrc = new File(item.getLrcPath());
-                boolean ret = lrc.delete();
-                if (!ret) {
-                    Toast.makeText(LrcJaeger.this, R.string.toast_delete_err, Toast.LENGTH_SHORT).show();
-                } else {
-                    mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
-                }
-            }
-        }
-        
-        private void removeListItem(int position) {
-            Message msg = mUiHandler.obtainMessage(MSG_REMOVE_ITEM_FROM_LIST, position, 0);
-            mUiHandler.sendMessage(msg);
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            int pos = mListView.pointToPosition((int) e.getX(), (int) e.getY());
-            onListViewItemClicked(pos);
-            return false;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH) {
-                return false;
-            }
-            if (Math.abs(e1.getX() - e2.getX()) > REL_SWIPE_MIN_DISTANCE
-                    && Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) {
-                int pos = mListView.pointToPosition((int) e1.getX(), (int) e1.getY());
-                if (e1.getX() < e2.getX()) {
-                    // fling left TODO animation
-                    removeListItem(pos);
-                } else {
-                    // fling right
-                    deleteLrc(pos);
-                }
-            }
-            return false;
-        }
-
     }
     
     private Handler mUiHandler = new Handler() {

@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+// modified from https://github.com/romannurik/android-swipetodismiss
+
 package com.example.android.swipedismiss;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -111,8 +114,11 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
          * @param listView               The originating {@link ListView}.
          * @param reverseSortedPositions An array of positions to dismiss, sorted in descending
          *                               order for convenience.
+         * @param dismissRight           is swipe from left to right
          */
-        void onDismiss(ListView listView, int[] reverseSortedPositions);
+        void onDismiss(ListView listView, int[] reverseSortedPositions, boolean dismissRight);
+        
+        void onSingleTapUp(int position);
     }
 
     /**
@@ -209,6 +215,10 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
             }
 
             case MotionEvent.ACTION_UP: {
+                if (!mSwiping) {
+                    mCallbacks.onSingleTapUp(mDownPosition);
+                    break;
+                }
                 if (mVelocityTracker == null) {
                     break;
                 }
@@ -234,15 +244,17 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                     // dismiss
                     final View downView = mDownView; // mDownView gets null'd before animation ends
                     final int downPosition = mDownPosition;
+                    final boolean right = dismissRight;
                     ++mDismissAnimationRefCount;
                     mDownView.animate()
-                            .translationX(dismissRight ? mViewWidth : -mViewWidth)
-                            .alpha((float) 0.5)
+                            .translationX(dismissRight ? mViewWidth : 0)
+                            .alpha(dismissRight ? 0 : 1)
                             .setDuration(mAnimationTime)
                             .setListener(new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
-                                    performDismiss(downView, downPosition);
+                                    Log.v("lrcjaeger", "translate animate end");
+                                    performDismiss(downView, downPosition, right);
                                 }
                             });
                 } else {
@@ -312,55 +324,59 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
         }
     }
 
-    private void performDismiss(final View dismissView, final int dismissPosition) {
+    private void performDismiss(final View dismissView, final int dismissPosition, final boolean dismissRight) {
         // Animate the dismissed list item to zero-height and fire the dismiss callback when
         // all dismissed list item animations have completed. This triggers layout on each animation
         // frame; in the future we may want to do something smarter and more performant.
 
-        final ViewGroup.LayoutParams lp = dismissView.getLayoutParams();
-        final int originalHeight = dismissView.getHeight();
+        if (dismissRight) {
+            final ViewGroup.LayoutParams lp = dismissView.getLayoutParams();
+            final int originalHeight = dismissView.getHeight();
 
-        ValueAnimator animator = ValueAnimator.ofInt(originalHeight, 1).setDuration(mAnimationTime);
+            ValueAnimator animator = ValueAnimator.ofInt(originalHeight, 1).setDuration(mAnimationTime);
 
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                --mDismissAnimationRefCount;
-                if (mDismissAnimationRefCount == 0) {
-                    // No active animations, process all pending dismisses.
-                    // Sort by descending position
-                    Collections.sort(mPendingDismisses);
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    --mDismissAnimationRefCount;
+                    if (mDismissAnimationRefCount == 0) {
+                        // No active animations, process all pending dismisses.
+                        // Sort by descending position
+                        Collections.sort(mPendingDismisses);
 
-                    int[] dismissPositions = new int[mPendingDismisses.size()];
-                    for (int i = mPendingDismisses.size() - 1; i >= 0; i--) {
-                        dismissPositions[i] = mPendingDismisses.get(i).position;
+                        int[] dismissPositions = new int[mPendingDismisses.size()];
+                        for (int i = mPendingDismisses.size() - 1; i >= 0; i--) {
+                            dismissPositions[i] = mPendingDismisses.get(i).position;
+                        }
+                        mCallbacks.onDismiss(mListView, dismissPositions, dismissRight);
+
+                        ViewGroup.LayoutParams lp;
+                        for (PendingDismissData pendingDismiss : mPendingDismisses) {
+                            // Reset view presentation
+                            pendingDismiss.view.setAlpha(1f);
+                            pendingDismiss.view.setTranslationX(0);
+                            lp = pendingDismiss.view.getLayoutParams();
+                            lp.height = originalHeight;
+                            pendingDismiss.view.setLayoutParams(lp);
+                        }
+
+                        mPendingDismisses.clear();
                     }
-                    mCallbacks.onDismiss(mListView, dismissPositions);
-
-                    ViewGroup.LayoutParams lp;
-                    for (PendingDismissData pendingDismiss : mPendingDismisses) {
-                        // Reset view presentation
-                        pendingDismiss.view.setAlpha(1f);
-                        pendingDismiss.view.setTranslationX(0);
-                        lp = pendingDismiss.view.getLayoutParams();
-                        lp.height = originalHeight;
-                        pendingDismiss.view.setLayoutParams(lp);
-                    }
-
-                    mPendingDismisses.clear();
                 }
-            }
-        });
+            });
 
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                lp.height = (Integer) valueAnimator.getAnimatedValue();
-                dismissView.setLayoutParams(lp);
-            }
-        });
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    lp.height = (Integer) valueAnimator.getAnimatedValue();
+                    dismissView.setLayoutParams(lp);
+                }
+            });
 
-        mPendingDismisses.add(new PendingDismissData(dismissPosition, dismissView));
-        animator.start();
+            mPendingDismisses.add(new PendingDismissData(dismissPosition, dismissView));
+            animator.start();
+        } else {
+            mCallbacks.onDismiss(mListView, new int[] {dismissPosition}, dismissRight);
+        }
     }
 }
