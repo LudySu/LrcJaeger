@@ -215,7 +215,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
             }
 
             case MotionEvent.ACTION_UP: {
-                if (!mSwiping) {
+                if (!mSwiping && !mPaused) {
                     mCallbacks.onSingleTapUp(mDownPosition);
                     break;
                 }
@@ -271,6 +271,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                 mDownView = null;
                 mDownPosition = ListView.INVALID_POSITION;
                 mSwiping = false;
+                Log.v("lrcjaeger", "up swiping = false");
                 break;
             }
 
