@@ -119,20 +119,24 @@ public class LrcJaeger extends Activity {
                     @Override
                     public void onSingleTapUp(int position) {
                         Log.v(TAG, "on item click at pos " + position);
-                        SongItem item = mAdapter.getItem(position);
-                        item.updateStatus();
-
-                        if (!Utils.isNetworkAvailable(LrcJaeger.this)) {
-                            Toast.makeText(LrcJaeger.this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT).show();
-                            Log.w(TAG, "no network connection");
-                            return;
+                        try {
+                            SongItem item = mAdapter.getItem(position);
+                            item.updateStatus();
+                            
+                            if (!Utils.isNetworkAvailable(LrcJaeger.this)) {
+                                Toast.makeText(LrcJaeger.this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT).show();
+                                Log.w(TAG, "no network connection");
+                                return;
+                            }
+                            
+                            Intent i = new Intent(LrcJaeger.this, SearchDialog.class);
+                            i.setData(Uri.fromFile(new File(item.getPath())));
+                            i.putExtra("title", item.getTitle());
+                            i.putExtra("artist", item.getArtist());
+                            LrcJaeger.this.startActivity(i);
+                        } catch (ArrayIndexOutOfBoundsException ex) {
+                            ex.printStackTrace();
                         }
-                        
-                        Intent i = new Intent(LrcJaeger.this, SearchDialog.class);
-                        i.setData(Uri.fromFile(new File(item.getPath())));
-                        i.putExtra("title", item.getTitle());
-                        i.putExtra("artist", item.getArtist());
-                        LrcJaeger.this.startActivity(i);
                     }
                 });
         mListView.setOnTouchListener(touchListener);
