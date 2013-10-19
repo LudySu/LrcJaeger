@@ -28,7 +28,7 @@ Import the source folder into Eclipse and build and run. Or you can download the
 
 ## Download
 
-v0.10-beta release [APK download](https://github.com/LudySu/LrcJaeger/releases/download/v0.10-beta/LrcJaeger.apk)
+latest release [APK from GitHub](https://github.com/LudySu/LrcJaeger/releases)
 
-v0.10-beta 发布 [APK 下载](https://github.com/LudySu/LrcJaeger/releases/download/v0.10-beta/LrcJaeger.apk)
+最新发布 [从GitHub下载APK](https://github.com/LudySu/LrcJaeger/releases)
 
