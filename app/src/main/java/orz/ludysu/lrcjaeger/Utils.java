@@ -18,7 +18,6 @@ public class Utils {
     }
 
     public static String readFile(String pathname) throws IOException {
-
         File file = new File(pathname);
         StringBuilder fileContents = new StringBuilder((int) file.length());
         Scanner scanner = new Scanner(file);
@@ -32,5 +31,13 @@ public class Utils {
         } finally {
             scanner.close();
         }
+    }
+
+    public static String getFolder(String path) {
+        int lastSlash = path.lastIndexOf("/");
+        if (lastSlash > 0) {
+            return path.substring(0, lastSlash);
+        }
+        return null;
     }
 }

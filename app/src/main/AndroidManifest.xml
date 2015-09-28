@@ -4,11 +4,8 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk
-        android:minSdkVersion="7"
-        android:targetSdkVersion="17" />
-    
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -18,22 +15,34 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="orz.ludysu.lrcjaeger.LrcJaeger"
+            android:name=".LrcJaeger"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity
-            android:windowSoftInputMode="stateAlwaysVisible"
-            android:name="orz.ludysu.lrcjaeger.SearchDialog"
+            android:name=".SearchDialog"
             android:excludeFromRecents="true"
-            android:label="@string/search_dialog" >
+            android:label="@string/search_dialog"
+            android:windowSoftInputMode="stateAlwaysVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_hide_folder" >
+        </activity>
+        <activity
+            android:name=".HideFoldersActivity"
+            android:label="@string/action_hide_folder"
+            android:parentActivityName=".LrcJaeger" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="orz.ludysu.lrcjaeger.LrcJaeger" />
         </activity>
     </application>
 

@@ -1,15 +1,14 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:lrcjaeger="http://schemas.android.com/apk/res-auto" >
 
-    <item
-        android:id="@+id/menu_downall"
-        android:orderInCategory="100"
-        android:showAsAction="always"
-        android:title="@string/menu_downall"/>
-    
-<!--     <item -->
-<!--         android:id="@+id/menu_download_rules" -->
-<!--         android:showAsAction="never" -->
-<!--         android:title="@string/menu_download_rules"/> -->
+    <item android:id="@+id/action_downall"
+          lrcjaeger:showAsAction="ifRoom"
+          android:title="@string/action_downall" />
+
+    <item android:id="@+id/action_hide"
+          lrcjaeger:showAsAction="ifRoom"
+          android:title="@string/action_hide_folder" />
+
 
 
 </menu>

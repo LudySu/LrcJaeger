@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
 
@@ -84,7 +85,7 @@ public class LrcJaeger extends AppCompatActivity {
 
         mListView.setOnTouchListener(gestureListener);
         
-        // initial song list
+        // initialize song list
         mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
     }
     
@@ -131,6 +132,18 @@ public class LrcJaeger extends AppCompatActivity {
             mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
             break;
         case R.id.action_hide:
+            HashSet<String> folders = new HashSet();
+            int count = mAdapter.getCount();
+            for (int i = 0; i < count; i++) {
+                folders.add(Utils.getFolder(mAdapter.getItem(i).getPath()));
+            }
+
+            Intent i = new Intent();
+            i.setClass(this, HideFoldersActivity.class);
+            ArrayList<String> list = new ArrayList();
+            list.addAll(folders);
+            i.putStringArrayListExtra("folders", list);
+            startActivity(i);
             break;
 
         default:
@@ -191,7 +204,6 @@ public class LrcJaeger extends AppCompatActivity {
             switch (msg.what) {
             case MSG_QUERY_DB:
                 // update song listview
-                HashMap<Integer, String> map = new HashMap<>();
                 activity.mAdapter.clear();
                 Cursor c = null;
                 try {
@@ -202,9 +214,7 @@ public class LrcJaeger extends AppCompatActivity {
                             String path = c.getString(1);
                             String artist = c.getString(2);
                             String title = c.getString(3);
-                            //activity.mAdapter.add(new SongItem(title, artist, path));
-                            String folder = Utils.getFolder(path);
-                            map.put(folder.hashCode(), path);
+                            activity.mAdapter.add(new SongItem(title, artist, path));
                         } while (c.moveToNext());
                     }
                 } finally {

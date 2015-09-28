@@ -3,8 +3,8 @@
 
     <string name="app_name">LrcJaeger</string>
     <string name="lrc_icon">Lrc</string>
-    <string name="menu_downall">Down All</string>
-    <string name="menu_download_rules">Download Rules</string>
+    <string name="action_downall">Down All</string>
+    <string name="action_hide_folder">Hide folders</string>
     
     <string name="toast_no_network_connection">No WiFi or 3G network connection</string>
     <string name="toast_delete_err">Delete lrc file failed</string>
@@ -12,6 +12,9 @@
     <string name="search_dialog">Search lyrics</string>
     <string name="et_search_hint_title">Title</string>
     <string name="et_search_hint_artist">Artist(optional)</string>
+
     <string name="toast_download_ok">Download OK</string>
     <string name="toast_lrc_not_found">Lyrics not found</string>
+
+
 </resources>
