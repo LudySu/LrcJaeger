@@ -1,52 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="left"
+    android:gravity="start"
     android:orientation="horizontal"
-    android:paddingBottom="3dip"
-    android:paddingTop="3dip" >
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp" >
 
     <TextView
         android:id="@+id/tv_has_lrc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:paddingBottom="2dip"
-        android:paddingTop="1dip"
+
         android:text="@string/lrc_icon"
         android:textSize="30sp" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tv_song_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:paddingBottom="1dip"
-        android:paddingTop="1dip" >
+        android:layout_toRightOf="@id/tv_has_lrc"
 
-        <TextView
-            android:id="@+id/tv_song_title"
-            android:paddingTop="1dip"
-            android:paddingBottom="1dip"
-            android:textSize="16sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dip"
-            android:singleLine="true"
-            android:ellipsize="end"/>
-        <TextView
-            android:id="@+id/tv_song_artist"
-            android:paddingTop="1dip"
-            android:paddingBottom="1dip"
-            android:textSize="12sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#808080"
-            android:layout_marginLeft="8dip"
-            android:singleLine="true"
-            android:ellipsize="end"/>
-    </LinearLayout>
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+
+        android:text="title"
+        android:textSize="16sp"
+        android:singleLine="true"
+        android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/tv_song_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_song_title"
+
+        android:layout_alignLeft="@id/tv_song_title"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+
+        android:text="artist"
+        android:textSize="12sp"
+        android:textColor="#808080"
+        android:singleLine="true"
+        android:ellipsize="end"/>
     
 
-</LinearLayout>
+</RelativeLayout>
