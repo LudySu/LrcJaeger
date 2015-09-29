@@ -2,8 +2,10 @@ package orz.ludysu.lrcjaeger;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,19 +14,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class HideFoldersActivity extends AppCompatActivity {
     private static final String TAG = "HideFoldersActivity";
 
-    private ArrayAdapter mAdapter = null;
-    private ListView mListView = null;
+    private Set<Integer> mHideFolders = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,19 +37,55 @@ public class HideFoldersActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         ArrayList<String> folders = i.getStringArrayListExtra("folders");
-        mAdapter = new FolderAdapter(this, folders);
+        final ArrayAdapter adapter = new FolderAdapter(this, folders);
 
-        mListView = (ListView) findViewById(R.id.lv_hide_folders);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // load hidden folders set by user from shared prefs
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        String folderHash = settings.getString("hide_folders", null);
+        if (folderHash != null) {
+            String[] tokens = folderHash.split(",");
+            for (String s : tokens) {
+                mHideFolders.add(Integer.parseInt(s));
+            }
+            //Log.v(TAG, folderHash);
+            //Log.v(TAG, mHideFolders.toString());
+        }
+
+        ListView lv = (ListView) findViewById(R.id.lv_hide_folders);
+        lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 CheckedTextView tv = (CheckedTextView) view;
                 tv.toggle();
                 int color = tv.isChecked() ? Color.BLACK : Color.LTGRAY;
                 tv.setTextColor(color);
+
+                if (tv.isChecked()) {
+                    mHideFolders.remove(adapter.getItem(position).hashCode());
+                } else {
+                    mHideFolders.add(adapter.getItem(position).hashCode());
+                }
             }
         });
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        StringBuilder sb = new StringBuilder();
+        for (int v : mHideFolders) {
+            sb.append(v);
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1); // delete last ","
+        //Log.v(TAG, sb.toString());
+        editor.putString("hide_folders", sb.toString());
+        editor.commit();
 
     }
 
@@ -71,6 +108,11 @@ public class HideFoldersActivity extends AppCompatActivity {
 
             CheckedTextView tv = (CheckedTextView) convertView.findViewById(R.id.cb_folder);
             tv.setText(folder);
+            if (mHideFolders.contains(folder.hashCode())) {
+                // this folder was set to be hidden
+                tv.setChecked(false);
+                tv.setTextColor(Color.LTGRAY);
+            }
 
             return convertView;
         }

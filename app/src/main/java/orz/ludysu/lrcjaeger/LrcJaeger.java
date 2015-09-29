@@ -3,7 +3,6 @@ package orz.ludysu.lrcjaeger;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
@@ -203,6 +202,8 @@ public class LrcJaeger extends AppCompatActivity {
 
             switch (msg.what) {
             case MSG_QUERY_DB:
+                // load hidden folders set by user from shared prefs
+
                 // update song listview
                 activity.mAdapter.clear();
                 Cursor c = null;
