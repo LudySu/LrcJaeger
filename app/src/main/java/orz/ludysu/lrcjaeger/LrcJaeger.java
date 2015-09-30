@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,14 +39,14 @@ public class LrcJaeger extends AppCompatActivity {
     private static final int MSG_UPDATE_LRC_ICON_ALL = 20;
     private static final int MSG_UPDATE_LRC_ICON = 21;
     private static final int MSG_REMOVE_ITEM_FROM_LIST = 31;
-    
-    
+
     private ListView mListView;
     private SongItemAdapter mAdapter;
     private MenuItem mDownAllButton;
     private ProgressBar mProgressBar;
     private BulkDownloadTask mTask;
     private UiHandler mUiHandler;
+    private HashSet<String> mAllFolders = new HashSet<>();
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,17 +132,12 @@ public class LrcJaeger extends AppCompatActivity {
             mProgressBar = (ProgressBar)getLayoutInflater().inflate(R.layout.progressbar, null);
             mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
             break;
-        case R.id.action_hide:
-            HashSet<String> folders = new HashSet();
-            int count = mAdapter.getCount();
-            for (int i = 0; i < count; i++) {
-                folders.add(Utils.getFolder(mAdapter.getItem(i).getPath()));
-            }
 
+        case R.id.action_hide:
             Intent i = new Intent();
             i.setClass(this, HideFoldersActivity.class);
             ArrayList<String> list = new ArrayList();
-            list.addAll(folders);
+            list.addAll(mAllFolders);
             i.putStringArrayListExtra("folders", list);
             startActivity(i);
             break;
@@ -202,20 +199,27 @@ public class LrcJaeger extends AppCompatActivity {
 
             switch (msg.what) {
             case MSG_QUERY_DB:
-                // load hidden folders set by user from shared prefs
+                // folders in this set should be hidden to user
+                Set<Integer> set = Utils.getHiddenFoldersFromPreference(activity);
+                Log.v(TAG, "hidden folders " + set.toString());
 
                 // update song listview
                 activity.mAdapter.clear();
                 Cursor c = null;
                 try {
-                    c = activity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, PROJECTION,
-                            "is_music=?", new String[]{"1"}, "title_key");
+                    c = activity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                            PROJECTION, "is_music=?", new String[]{"1"}, "title_key");
                     if (c != null && c.moveToFirst()) {
                         do {
                             String path = c.getString(1);
                             String artist = c.getString(2);
                             String title = c.getString(3);
-                            activity.mAdapter.add(new SongItem(title, artist, path));
+                            String folder = Utils.getFolder(path);
+                            activity.mAllFolders.add(folder);
+                            if (!set.contains(folder.hashCode())) {
+                                Log.v(TAG, "adding " + folder.hashCode());
+                                activity.mAdapter.add(new SongItem(title, artist, path));
+                            }
                         } while (c.moveToNext());
                     }
                 } finally {
@@ -223,8 +227,6 @@ public class LrcJaeger extends AppCompatActivity {
                         c.close();
                     }
                 }
-
-                // TODO: remove unneeded folders set by user
 
                 break;
             case MSG_DOWNLOAD_ALL:

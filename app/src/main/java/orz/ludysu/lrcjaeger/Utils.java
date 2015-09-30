@@ -1,15 +1,22 @@
 package orz.ludysu.lrcjaeger;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.util.Log;
 
 
 public class Utils {
+
+    private static final String TAG = "Utils";
 
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager 
@@ -18,7 +25,9 @@ public class Utils {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    /* Checks if external storage is available for read and write */
+    /**
+     *  Checks if external storage is available for read and write
+     */
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -27,7 +36,9 @@ public class Utils {
         return false;
     }
 
-    /* Checks if external storage is available to at least read */
+    /**
+     *  Checks if external storage is available to at least read
+     */
     public boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state) ||
@@ -59,5 +70,23 @@ public class Utils {
             return path.substring(0, lastSlash);
         }
         return null;
+    }
+
+    /**
+     * Load hidden folders set by user from shared prefs
+     */
+    public static Set<Integer> getHiddenFoldersFromPreference(Activity activity) {
+        SharedPreferences settings = activity.getSharedPreferences("prefs", Activity.MODE_PRIVATE);
+        String folderHash = settings.getString("hide_folders", null);
+        Set<Integer> set = new HashSet<>();
+        if (folderHash != null) {
+            String[] tokens = folderHash.split(",");
+            for (String s : tokens) {
+                set.add(Integer.parseInt(s));
+            }
+            //Log.v(TAG, folderHash);
+            //Log.v(TAG, set.toString());
+        }
+        return set;
     }
 }
