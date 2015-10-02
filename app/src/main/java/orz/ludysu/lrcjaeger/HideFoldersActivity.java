@@ -35,7 +35,6 @@ public class HideFoldersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hide_folders);
         ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
         bar.setTitle(R.string.action_hide_folder);
 
         Intent i = getIntent();
@@ -86,14 +85,14 @@ public class HideFoldersActivity extends AppCompatActivity {
                 if (mHiddenFolders.size() > 0) {
                     sb.deleteCharAt(sb.length() - 1); // delete last ","
                 }
-                //Log.v(TAG, sb.toString());
                 editor.putString("hide_folders", sb.toString());
                 editor.commit();
 
                 finish();
+                break;
 
             default:
-                break;
+                return super.onOptionsItemSelected(item);
         }
         return true;
     }

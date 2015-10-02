@@ -84,8 +84,6 @@ public class Utils {
             for (String s : tokens) {
                 set.add(Integer.parseInt(s));
             }
-            //Log.v(TAG, folderHash);
-            //Log.v(TAG, set.toString());
         }
         return set;
     }

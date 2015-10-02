@@ -112,7 +112,7 @@ public class LrcJaeger extends AppCompatActivity {
         mUiHandler.removeCallbacksAndMessages(null);
         mUiHandler = null;
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -144,7 +144,7 @@ public class LrcJaeger extends AppCompatActivity {
                 break;
 
             default:
-                break;
+                return super.onOptionsItemSelected(item);
         }
         return true;
     }
@@ -195,7 +195,7 @@ public class LrcJaeger extends AppCompatActivity {
             switch (msg.what) {
                 case MSG_QUERY_DB:
                     // folders in this set should be hidden to user
-                    Set<Integer> set = Utils.getHiddenFoldersFromPreference(activity);
+                    Set<Integer> hiddenSet = Utils.getHiddenFoldersFromPreference(activity);
 
                     // update song listview
                     activity.mAdapter.clear();
@@ -210,8 +210,7 @@ public class LrcJaeger extends AppCompatActivity {
                                 String title = c.getString(3);
                                 String folder = Utils.getFolder(path);
                                 activity.mAllFolders.add(folder);
-                                if (!set.contains(folder.hashCode())) {
-                                    //Log.v(TAG, "adding " + folder.hashCode());
+                                if (!hiddenSet.contains(folder.hashCode())) {
                                     activity.mAdapter.add(new SongItem(title, artist, path));
                                 }
                             } while (c.moveToNext());
@@ -224,7 +223,7 @@ public class LrcJaeger extends AppCompatActivity {
                     break;
 
                 case MSG_DOWNLOAD_ALL:
-                    ArrayList<SongItem> listAll = new ArrayList<SongItem>();
+                    ArrayList<SongItem> listAll = new ArrayList();
                     for (int i = 0; i < activity.mAdapter.getCount(); i++) {
                         SongItem item = activity.mAdapter.getItem(i);
                         if (!item.isHasLrc()) {
