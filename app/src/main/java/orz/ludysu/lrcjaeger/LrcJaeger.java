@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -24,6 +25,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -59,6 +61,14 @@ public class LrcJaeger extends AppCompatActivity {
         mAdapter.setLrcClickListener(new OnLrcClickListener() {
             @Override
             public void OnLrcClick(int position) {
+                // FIXME
+            }
+        });
+
+        mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SongItem item = mAdapter.getItem(position);
                 if (item.isHasLrc()) {
                     String lrc = "Cannot read file: IO Error";
@@ -74,17 +84,6 @@ public class LrcJaeger extends AppCompatActivity {
                 }
             }
         });
-        mListView.setAdapter(mAdapter);
-        
-        final GestureDetector gestureDetector = new GestureDetector(this, new MyGestureDetector());
-        
-        View.OnTouchListener gestureListener = new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-        };
-
-        mListView.setOnTouchListener(gestureListener);
     }
     
     @Override
@@ -149,34 +148,6 @@ public class LrcJaeger extends AppCompatActivity {
         return true;
     }
     
-    private class MyGestureDetector extends SimpleOnGestureListener {
-        
-        public MyGestureDetector() {
-            super();
-        }
-        
-        private void onListViewItemClicked(int position) {
-            Log.v(TAG, "on item click at pos " + position);
-            SongItem item = mAdapter.getItem(position);
-            item.updateStatus();
-            if (!item.isHasLrc()) {
-                Message msg = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEM, item);
-                mUiHandler.sendMessage(msg);
-            } else {
-                // TODO search by hand
-            }
-        }
-
-        // Detect a single-click and call my own handler.
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            int pos = mListView.pointToPosition((int) e.getX(), (int) e.getY());
-            onListViewItemClicked(pos);
-            return false;
-        }
-
-    }
-    
     private static class UiHandler extends Handler {
         WeakReference<LrcJaeger> mActivity = null;
 
@@ -231,15 +202,15 @@ public class LrcJaeger extends AppCompatActivity {
                         }
                     }
                     if (listAll.size() > 0) {
-                        activity.mDownAllButton.setActionView(activity.mProgressBar);
-                        activity.mDownAllButton.expandActionView();
+                        MenuItemCompat.setActionView(activity.mDownAllButton, activity.mProgressBar);
+                        MenuItemCompat.expandActionView(activity.mDownAllButton);
 
                         activity.mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
                             @Override
                             public void onFinish(int downloaded) {
                                 if (activity.mDownAllButton != null) {
-                                    activity.mDownAllButton.collapseActionView();
-                                    activity.mDownAllButton.setActionView(null);
+                                    MenuItemCompat.collapseActionView(activity.mDownAllButton);
+                                    MenuItemCompat.setActionView(activity.mDownAllButton, null);
                                 }
                                 sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
                             }
