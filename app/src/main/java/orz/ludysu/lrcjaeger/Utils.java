@@ -79,7 +79,7 @@ public class Utils {
         SharedPreferences settings = activity.getSharedPreferences("prefs", Activity.MODE_PRIVATE);
         String folderHash = settings.getString("hide_folders", null);
         Set<Integer> set = new HashSet<>();
-        if (folderHash != null) {
+        if (folderHash != null && folderHash.length() > 0) {
             String[] tokens = folderHash.split(",");
             for (String s : tokens) {
                 set.add(Integer.parseInt(s));

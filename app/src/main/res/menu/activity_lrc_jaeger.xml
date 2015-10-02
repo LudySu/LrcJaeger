@@ -9,6 +9,4 @@
           lrcjaeger:showAsAction="ifRoom"
           android:title="@string/action_hide_folder" />
 
-
-
 </menu>

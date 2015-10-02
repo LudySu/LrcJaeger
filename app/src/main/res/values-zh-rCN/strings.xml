@@ -2,6 +2,8 @@
 <resources>
 
     <string name="app_name">歌词猎手</string>
+
+    <!-- LrcJaeger -->
     <string name="lrc_icon">词</string>
     <string name="action_downall">全部下载</string>
     <string name="action_hide_folder">过滤文件夹</string>
@@ -15,6 +17,7 @@
     <string name="et_search_hint_title">标题</string>
     <string name="et_search_hint_artist">艺术家（可不填）</string>
 
-
+    <!-- HideFoldersActivity -->
+    <string name="action_save">保存</string>
 
 </resources>

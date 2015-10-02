@@ -10,7 +10,6 @@ import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,10 +45,11 @@ public class LrcJaeger extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private BulkDownloadTask mTask;
     private UiHandler mUiHandler;
-    private HashSet<String> mAllFolders = new HashSet<>();
+    private Set<String> mAllFolders = new HashSet<>();
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_jaeger);
 
@@ -85,21 +85,23 @@ public class LrcJaeger extends AppCompatActivity {
         };
 
         mListView.setOnTouchListener(gestureListener);
-        
-        // initialize song list
-        mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
     }
     
     @Override
     protected void onResume() {
+        Log.v(TAG, "onResume");
         super.onResume();
-        
+
+        // initialize song list
+        mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
+
         // update lrc icons
         mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
     }
-    
+
     @Override
     public void onDestroy() {
+        Log.v(TAG, "onDestroy");
         super.onDestroy();
         
         if (mTask != null) {
@@ -117,41 +119,34 @@ public class LrcJaeger extends AppCompatActivity {
         inflater.inflate(R.menu.activity_lrc_jaeger, menu);
         return super.onCreateOptionsMenu(menu);
     }
-    
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.action_downall:
-            if (!Utils.isNetworkAvailable(this)) {
-                Toast.makeText(this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "no network connection");
+            case R.id.action_downall:
+                if (!Utils.isNetworkAvailable(this)) {
+                    Toast.makeText(this, R.string.toast_no_network_connection, Toast.LENGTH_SHORT).show();
+                    Log.w(TAG, "no network connection");
+                    break;
+                }
+                mDownAllButton = item;
+                mProgressBar = (ProgressBar)getLayoutInflater().inflate(R.layout.progressbar, null);
+                mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
                 break;
-            }
-            mDownAllButton = item;
-            mProgressBar = (ProgressBar)getLayoutInflater().inflate(R.layout.progressbar, null);
-            mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
-            break;
 
-        case R.id.action_hide:
-            Intent i = new Intent();
-            i.setClass(this, HideFoldersActivity.class);
-            ArrayList<String> list = new ArrayList();
-            list.addAll(mAllFolders);
-            i.putStringArrayListExtra("folders", list);
-            startActivity(i);
-            break;
+            case R.id.action_hide:
+                Intent i = new Intent();
+                i.setClass(this, HideFoldersActivity.class);
+                ArrayList<String> list = new ArrayList();
+                list.addAll(mAllFolders);
+                i.putStringArrayListExtra("folders", list);
+                startActivity(i);
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
         return true;
-    } 
-    
-    @Override
-    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-        // update lrc icons
-        mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
     }
     
     private class MyGestureDetector extends SimpleOnGestureListener {
@@ -198,83 +193,82 @@ public class LrcJaeger extends AppCompatActivity {
             }
 
             switch (msg.what) {
-            case MSG_QUERY_DB:
-                // folders in this set should be hidden to user
-                Set<Integer> set = Utils.getHiddenFoldersFromPreference(activity);
-                Log.v(TAG, "hidden folders " + set.toString());
+                case MSG_QUERY_DB:
+                    // folders in this set should be hidden to user
+                    Set<Integer> set = Utils.getHiddenFoldersFromPreference(activity);
 
-                // update song listview
-                activity.mAdapter.clear();
-                Cursor c = null;
-                try {
-                    c = activity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                            PROJECTION, "is_music=?", new String[]{"1"}, "title_key");
-                    if (c != null && c.moveToFirst()) {
-                        do {
-                            String path = c.getString(1);
-                            String artist = c.getString(2);
-                            String title = c.getString(3);
-                            String folder = Utils.getFolder(path);
-                            activity.mAllFolders.add(folder);
-                            if (!set.contains(folder.hashCode())) {
-                                Log.v(TAG, "adding " + folder.hashCode());
-                                activity.mAdapter.add(new SongItem(title, artist, path));
-                            }
-                        } while (c.moveToNext());
-                    }
-                } finally {
-                    if (c != null) {
-                        c.close();
-                    }
-                }
-
-                break;
-            case MSG_DOWNLOAD_ALL:
-                ArrayList<SongItem> listAll = new ArrayList<SongItem>();
-                for (int i = 0; i < activity.mAdapter.getCount(); i++) {
-                    SongItem item = activity.mAdapter.getItem(i);
-                    if (!item.isHasLrc()) {
-                        listAll.add(item);
-                    }
-                }
-                if (listAll.size() > 0) {
-                    activity.mDownAllButton.setActionView(activity.mProgressBar);
-                    activity.mDownAllButton.expandActionView();
-
-                    activity.mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
-                        @Override
-                        public void onFinish(int downloaded) {
-                            if (activity.mDownAllButton != null) {
-                                activity.mDownAllButton.collapseActionView();
-                                activity.mDownAllButton.setActionView(null);
-                            }
-                            sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                    // update song listview
+                    activity.mAdapter.clear();
+                    Cursor c = null;
+                    try {
+                        c = activity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                PROJECTION, "is_music=?", new String[]{"1"}, "title_key");
+                        if (c != null && c.moveToFirst()) {
+                            do {
+                                String path = c.getString(1);
+                                String artist = c.getString(2);
+                                String title = c.getString(3);
+                                String folder = Utils.getFolder(path);
+                                activity.mAllFolders.add(folder);
+                                if (!set.contains(folder.hashCode())) {
+                                    //Log.v(TAG, "adding " + folder.hashCode());
+                                    activity.mAdapter.add(new SongItem(title, artist, path));
+                                }
+                            } while (c.moveToNext());
                         }
-
-                        @Override
-                        public void onProgressUpdate(int progress) {
-                            activity.mProgressBar.setProgress(progress);
+                    } finally {
+                        if (c != null) {
+                            c.close();
                         }
-                    });
-                    activity.mTask.execute(listAll.toArray(new SongItem[1]));
-                }
-                break;
-            case MSG_UPDATE_LRC_ICON:
-                break;
-            case MSG_UPDATE_LRC_ICON_ALL:
-                for (int i = 0; i < activity.mAdapter.getCount(); i++) {
-                    SongItem it = activity.mAdapter.getItem(i);
-                    it.updateStatus();
-                }
-                activity.mAdapter.notifyDataSetChanged();
-                break;
-            case MSG_REMOVE_ITEM_FROM_LIST:
-                int pos = msg.arg1;
-                activity.mAdapter.remove(activity.mAdapter.getItem(pos));
-                break;
-            default:
-                Log.w(TAG, "Unknown message");
-                break;
+                    }
+                    break;
+
+                case MSG_DOWNLOAD_ALL:
+                    ArrayList<SongItem> listAll = new ArrayList<SongItem>();
+                    for (int i = 0; i < activity.mAdapter.getCount(); i++) {
+                        SongItem item = activity.mAdapter.getItem(i);
+                        if (!item.isHasLrc()) {
+                            listAll.add(item);
+                        }
+                    }
+                    if (listAll.size() > 0) {
+                        activity.mDownAllButton.setActionView(activity.mProgressBar);
+                        activity.mDownAllButton.expandActionView();
+
+                        activity.mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
+                            @Override
+                            public void onFinish(int downloaded) {
+                                if (activity.mDownAllButton != null) {
+                                    activity.mDownAllButton.collapseActionView();
+                                    activity.mDownAllButton.setActionView(null);
+                                }
+                                sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                            }
+
+                            @Override
+                            public void onProgressUpdate(int progress) {
+                                activity.mProgressBar.setProgress(progress);
+                            }
+                        });
+                        activity.mTask.execute(listAll.toArray(new SongItem[1]));
+                    }
+                    break;
+                case MSG_UPDATE_LRC_ICON:
+                    break;
+                case MSG_UPDATE_LRC_ICON_ALL:
+                    for (int i = 0; i < activity.mAdapter.getCount(); i++) {
+                        SongItem it = activity.mAdapter.getItem(i);
+                        it.updateStatus();
+                    }
+                    activity.mAdapter.notifyDataSetChanged();
+                    break;
+                case MSG_REMOVE_ITEM_FROM_LIST:
+                    int pos = msg.arg1;
+                    activity.mAdapter.remove(activity.mAdapter.getItem(pos));
+                    break;
+                default:
+                    Log.w(TAG, "Unknown message");
+                    break;
             }
         }
     };

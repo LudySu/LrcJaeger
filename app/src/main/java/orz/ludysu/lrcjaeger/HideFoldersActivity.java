@@ -7,7 +7,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -60,21 +66,36 @@ public class HideFoldersActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_hide_folders, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-        SharedPreferences settings = getSharedPreferences("prefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        StringBuilder sb = new StringBuilder();
-        for (int v : mHiddenFolders) {
-            sb.append(v);
-            sb.append(",");
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_save:
+                SharedPreferences settings = getSharedPreferences("prefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                StringBuilder sb = new StringBuilder();
+                for (int v : mHiddenFolders) {
+                    sb.append(v);
+                    sb.append(",");
+                }
+                if (mHiddenFolders.size() > 0) {
+                    sb.deleteCharAt(sb.length() - 1); // delete last ","
+                }
+                //Log.v(TAG, sb.toString());
+                editor.putString("hide_folders", sb.toString());
+                editor.commit();
+
+                finish();
+
+            default:
+                break;
         }
-        sb.deleteCharAt(sb.length() - 1); // delete last ","
-        //Log.v(TAG, sb.toString());
-        editor.putString("hide_folders", sb.toString());
-        editor.commit();
-
+        return true;
     }
 
     private class FolderAdapter extends ArrayAdapter<String> {
