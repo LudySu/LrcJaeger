@@ -139,7 +139,7 @@ public class LrcJaeger extends AppCompatActivity {
                 i.setClass(this, HideFoldersActivity.class);
                 ArrayList<String> list = new ArrayList();
                 list.addAll(mAllFolders);
-                i.putStringArrayListExtra("folders", list);
+                i.putStringArrayListExtra(HideFoldersActivity.INTENT_DATA_KEY, list);
                 startActivity(i);
                 break;
 

@@ -76,8 +76,9 @@ public class Utils {
      * Load hidden folders set by user from shared prefs
      */
     public static Set<Integer> getHiddenFoldersFromPreference(Activity activity) {
-        SharedPreferences settings = activity.getSharedPreferences("prefs", Activity.MODE_PRIVATE);
-        String folderHash = settings.getString("hide_folders", null);
+        SharedPreferences settings = activity.getSharedPreferences(HideFoldersActivity.PREFERENCE_NAME,
+                Activity.MODE_PRIVATE);
+        String folderHash = settings.getString(HideFoldersActivity.HIDE_FOLDER_PREF_KEY, null);
         Set<Integer> set = new HashSet<>();
         if (folderHash != null && folderHash.length() > 0) {
             String[] tokens = folderHash.split(",");

@@ -28,6 +28,10 @@ import java.util.Set;
 public class HideFoldersActivity extends AppCompatActivity {
     private static final String TAG = "HideFoldersActivity";
 
+    public static final String PREFERENCE_NAME = "prefs";
+    public static final String HIDE_FOLDER_PREF_KEY = "hide_folders";
+    public static final String INTENT_DATA_KEY = "folders";
+
     private Set<Integer> mHiddenFolders = new HashSet<>();
 
     @Override
@@ -38,7 +42,7 @@ public class HideFoldersActivity extends AppCompatActivity {
         bar.setTitle(R.string.action_hide_folder);
 
         Intent i = getIntent();
-        ArrayList<String> folders = i.getStringArrayListExtra("folders");
+        ArrayList<String> folders = i.getStringArrayListExtra(INTENT_DATA_KEY);
         final ArrayAdapter adapter = new FolderAdapter(this, folders);
 
         // load hidden folders set by user from shared prefs
@@ -75,7 +79,7 @@ public class HideFoldersActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                SharedPreferences settings = getSharedPreferences("prefs", MODE_PRIVATE);
+                SharedPreferences settings = getSharedPreferences(PREFERENCE_NAME, MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 StringBuilder sb = new StringBuilder();
                 for (int v : mHiddenFolders) {
@@ -85,7 +89,7 @@ public class HideFoldersActivity extends AppCompatActivity {
                 if (mHiddenFolders.size() > 0) {
                     sb.deleteCharAt(sb.length() - 1); // delete last ","
                 }
-                editor.putString("hide_folders", sb.toString());
+                editor.putString(HIDE_FOLDER_PREF_KEY, sb.toString());
                 editor.commit();
 
                 finish();
