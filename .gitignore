@@ -1,0 +1,10 @@
+.gitignore
+gradle/
+
+.gradle
+.idea
+**/*.iml
+local.properties
+build
+*~
+.DS_Store
