@@ -26,5 +26,6 @@
     <string name="title_display_lrc">歌词内容</string>
     <string name="title_lrc_path">歌词路径：</string>
     <string name="action_text_only">隐藏时间轴</string>
+    <string name="action_whole_lrc">完整歌词</string>
 
 </resources>

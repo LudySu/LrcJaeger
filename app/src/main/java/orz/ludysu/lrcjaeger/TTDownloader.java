@@ -220,7 +220,7 @@ public class TTDownloader {
         return result;
     }
     
-    private static String LINE_SEPERATOR = System.getProperty("line.separator");
+    private static String LINE_SEPARATOR = System.getProperty("line.separator");
     private static String getHttpResponse(String urlString) {
 
         HttpURLConnection urlConnection = null;
@@ -235,7 +235,7 @@ public class TTDownloader {
             String line;
             while ((line = r.readLine()) != null) {
                 total.append(line);
-                total.append(LINE_SEPERATOR);
+                total.append(LINE_SEPARATOR);
             }
             return total.toString();
         } catch (MalformedURLException ex) {
