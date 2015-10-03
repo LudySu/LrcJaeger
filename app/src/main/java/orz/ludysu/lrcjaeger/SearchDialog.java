@@ -75,7 +75,7 @@ public class SearchDialog extends Activity {
                 mSongItem.setArtist(artist);
                 Log.v(TAG, "search title " + title + ", artist " + artist);
                 
-                if (!title.isEmpty()) {
+                if (title.length() > 0) {
                     mHandler.sendEmptyMessage(MSG_QUERY);
                 }
                 InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE); 

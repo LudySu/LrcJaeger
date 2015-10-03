@@ -30,6 +30,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+// Main activity
 public class LrcJaeger extends AppCompatActivity {
     private static final String TAG = "LrcJaeger";
     private static final String[] PROJECTION = new String[] {"_id", "_data", "artist", "title"};
@@ -66,6 +67,8 @@ public class LrcJaeger extends AppCompatActivity {
         });
 
         mListView.setAdapter(mAdapter);
+
+        // show a dialog that display lyric
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -78,10 +81,22 @@ public class LrcJaeger extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(LrcJaeger.this);
-                    builder.setMessage(lrc);
-                    builder.create().show();
+                    Intent i = new Intent();
+                    i.setClass(LrcJaeger.this, DisplayLrcActivity.class);
+                    i.putExtra(DisplayLrcActivity.INTENT_CONTENT_KEY, lrc);
+                    // FIXME use file name if no title
+                    i.putExtra(DisplayLrcActivity.INTENT_TITLE_KEY, item.getTitle());
+                    i.putExtra(DisplayLrcActivity.INTENT_PATH_KEY, item.getLrcPath());
+                    startActivity(i);
                 }
+            }
+        });
+
+        // show popup menu
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                return true;
             }
         });
     }
@@ -152,14 +167,14 @@ public class LrcJaeger extends AppCompatActivity {
         WeakReference<LrcJaeger> mActivity = null;
 
         public UiHandler(LrcJaeger activity) {
-            mActivity = new WeakReference<LrcJaeger>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
             final LrcJaeger activity = mActivity.get();
             if (activity == null) {
-                Log.e(TAG, "Cannot handle message: activity was destroyed");
+                Log.e(TAG, "Cannot handle message: activity has been destroyed");
                 return;
             }
 
@@ -194,7 +209,7 @@ public class LrcJaeger extends AppCompatActivity {
                     break;
 
                 case MSG_DOWNLOAD_ALL:
-                    ArrayList<SongItem> listAll = new ArrayList();
+                    final ArrayList<SongItem> listAll = new ArrayList<>();
                     for (int i = 0; i < activity.mAdapter.getCount(); i++) {
                         SongItem item = activity.mAdapter.getItem(i);
                         if (!item.isHasLrc()) {
@@ -213,6 +228,10 @@ public class LrcJaeger extends AppCompatActivity {
                                     MenuItemCompat.setActionView(activity.mDownAllButton, null);
                                 }
                                 sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+
+                                String text = String.format(activity.getString(R.string.toast_lrc_downloaded),
+                                        downloaded, listAll.size());
+                                Toast.makeText(activity, text, Toast.LENGTH_SHORT);
                             }
 
                             @Override
@@ -223,8 +242,10 @@ public class LrcJaeger extends AppCompatActivity {
                         activity.mTask.execute(listAll.toArray(new SongItem[1]));
                     }
                     break;
+
                 case MSG_UPDATE_LRC_ICON:
                     break;
+
                 case MSG_UPDATE_LRC_ICON_ALL:
                     for (int i = 0; i < activity.mAdapter.getCount(); i++) {
                         SongItem it = activity.mAdapter.getItem(i);
@@ -232,13 +253,14 @@ public class LrcJaeger extends AppCompatActivity {
                     }
                     activity.mAdapter.notifyDataSetChanged();
                     break;
+
                 case MSG_REMOVE_ITEM_FROM_LIST:
                     int pos = msg.arg1;
                     activity.mAdapter.remove(activity.mAdapter.getItem(pos));
                     break;
+
                 default:
-                    Log.w(TAG, "Unknown message");
-                    break;
+                    throw new IllegalArgumentException("Unknown message code " + msg.what);
             }
         }
     };

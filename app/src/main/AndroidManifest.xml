@@ -39,7 +39,15 @@
         </activity>
         <activity
             android:name=".HideFoldersActivity"
-            android:label="@string/action_hide_folder"
+            android:label="@string/title_hide_folder"
+            android:parentActivityName=".LrcJaeger" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="orz.ludysu.lrcjaeger.LrcJaeger" />
+        </activity>
+        <activity
+            android:name=".DisplayLrcActivity"
+            android:label="@string/title_display_lrc"
             android:parentActivityName=".LrcJaeger" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
