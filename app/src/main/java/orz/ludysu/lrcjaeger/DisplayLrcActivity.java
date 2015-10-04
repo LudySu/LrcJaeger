@@ -1,6 +1,7 @@
 package orz.ludysu.lrcjaeger;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -10,8 +11,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.regex.Matcher;
@@ -29,6 +32,9 @@ public class DisplayLrcActivity extends AppCompatActivity {
     private String mLrcContent;
     private String mTextContent;
     private boolean mIsInTextOnlyMode = false;
+    private String mLrcPath;
+    private String mTitle;
+    private String mArtist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,17 +44,18 @@ public class DisplayLrcActivity extends AppCompatActivity {
         bar.setDisplayHomeAsUpEnabled(true);
 
         Intent i = getIntent();
-        bar.setTitle(i.getStringExtra(INTENT_TITLE_KEY));
+        mTitle = i.getStringExtra(INTENT_TITLE_KEY);
+        bar.setTitle(mTitle);
 
         TextView path = (TextView) findViewById(R.id.tv_lrc_path);
-        path.setText(getString(R.string.title_lrc_path) + i.getStringExtra(INTENT_PATH_KEY));
+        mLrcPath = i.getStringExtra(INTENT_PATH_KEY);
+        path.setText(getString(R.string.title_lrc_path) + mLrcPath);
 
         TextView tv = (TextView) findViewById(R.id.tv_lrc_content);
         mLrcContent = i.getStringExtra(INTENT_CONTENT_KEY);
         tv.setText(mLrcContent);
         tv.setMovementMethod(new ScrollingMovementMethod());
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,6 +106,22 @@ public class DisplayLrcActivity extends AppCompatActivity {
                     item.setTitle(R.string.action_text_only);
                     mIsInTextOnlyMode = false;
                 }
+                break;
+
+            case R.id.action_delete_lrc:
+                if (mLrcPath.length() > 0) {
+                    boolean ok = (new File(mLrcPath)).delete();
+                    if (!ok) {
+                        Toast.makeText(this, getString(R.string.toast_delete_err), Toast.LENGTH_SHORT);
+                    }
+                    finish();
+                }
+                break;
+
+            case R.id.action_search_lrc:
+                break;
+
+            case R.id.action_edit_lrc:
                 break;
 
             default:
