@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class DisplayLrcActivity extends AppCompatActivity {
 
-    public static final String TAG = "DisplayLrcActivity";
+    private static final String TAG = "DisplayLrcActivity";
     private static String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public static final String INTENT_CONTENT_KEY = "lrc_content";
@@ -61,21 +61,20 @@ public class DisplayLrcActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_text_only:
-                if (!mIsInTextOnlyMode) {
+                if (!mIsInTextOnlyMode) { // toggle to text only mode
                     if (mTextContent == null) {
+                        // remove time tag in .lrc file and only extract text
                         StringBuilder sb = new StringBuilder();
                         try {
                             BufferedReader reader = new BufferedReader(new StringReader(mLrcContent));
 
-                            // match lines like: [00:06.78]lyric content
+                            // match lines in .lrc format like: [00:06.78]lyric content
                             Pattern p = Pattern.compile("^\\[\\d{2}:\\d{2}\\.\\d{2}\\](.*)");
 
                             String line;
                             while ((line = reader.readLine()) != null) {
                                 Matcher m = p.matcher(line);
                                 boolean matches = m.find();
-                                Log.v(TAG, "match = " + matches + ", line = " + line);
-
                                 if (matches) {
                                     sb.append(m.group(1));
                                     sb.append(LINE_SEPARATOR);
@@ -93,7 +92,7 @@ public class DisplayLrcActivity extends AppCompatActivity {
 
                     item.setTitle(R.string.action_whole_lrc);
                     mIsInTextOnlyMode = true;
-                } else {
+                } else { // toggle to whole lrc content mode including time tag
                     TextView tv = (TextView) findViewById(R.id.tv_lrc_content);
                     tv.setText(mLrcContent);
 

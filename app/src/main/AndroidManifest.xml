@@ -5,7 +5,6 @@
     android:versionName="1.0" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
@@ -25,13 +24,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SearchDialog"
+            android:name=".SearchActivity"
             android:excludeFromRecents="true"
-            android:label="@string/search_dialog"
+            android:label="@string/title_search_activity"
             android:windowSoftInputMode="stateAlwaysVisible" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="orz.ludysu.lrcjaeger.LrcJaeger" />
         </activity>
         <activity
             android:name=".SettingsActivity"
@@ -39,16 +38,14 @@
         </activity>
         <activity
             android:name=".HideFoldersActivity"
-            android:label="@string/title_hide_folder"
-            android:parentActivityName=".LrcJaeger" >
+            android:label="@string/title_hide_folder" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="orz.ludysu.lrcjaeger.LrcJaeger" />
         </activity>
         <activity
             android:name=".DisplayLrcActivity"
-            android:label="@string/title_display_lrc"
-            android:parentActivityName=".LrcJaeger" >
+            android:label="@string/title_display_lrc" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="orz.ludysu.lrcjaeger.LrcJaeger" />

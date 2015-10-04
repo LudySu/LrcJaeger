@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- See zh-rCN translation which is better organized and well ordered -->
+
     <string name="app_name">LrcJaeger</string>
     <string name="lrc_icon">Lrc</string>
     <string name="action_downall">Down All</string>
@@ -8,13 +10,22 @@
     
     <string name="toast_no_network_connection">No WiFi or 3G network connection</string>
     <string name="toast_delete_err">Delete lrc file failed</string>
-    
-    <string name="search_dialog">Search lyrics</string>
+
     <string name="et_search_hint_title">Title</string>
     <string name="et_search_hint_artist">Artist(optional)</string>
 
     <string name="toast_download_ok">Download OK</string>
-    <string name="toast_lrc_not_found">Lyrics not found</string>
+    <string name="action_save">Save</string>
+    <string name="action_text_only">Text Only</string>
+    <string name="action_whole_lrc">Whole Lrc</string>
+    <string name="title_display_lrc">Lrc content</string>
+    <string name="title_hide_folder">Hide folders</string>
+    <string name="title_lrc_path">Lrc path: </string>
+    <string name="toast_lrc_downloaded">%1$d of %2$ item(s) has been downloaded</string>
+    <string name="title_search_activity">Search Lrc</string>
+    <string name="msg_lrc_downloading">Downloading, please wait......</string>
+    <string name="msg_lrc_not_found">Lrc not found</string>
+    <string name="btn_search">Search</string>
 
 
 </resources>

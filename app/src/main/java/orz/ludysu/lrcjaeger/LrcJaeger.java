@@ -11,6 +11,7 @@ import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -87,6 +88,13 @@ public class LrcJaeger extends AppCompatActivity {
                     // FIXME use file name if no title
                     i.putExtra(DisplayLrcActivity.INTENT_TITLE_KEY, item.getTitle());
                     i.putExtra(DisplayLrcActivity.INTENT_PATH_KEY, item.getLrcPath());
+                    startActivity(i);
+                } else {
+                    Intent i = new Intent();
+                    i.setClass(LrcJaeger.this, SearchActivity.class);
+                    i.setData(Uri.parse("file://" + item.getPath()));
+                    i.putExtra(SearchActivity.INTENT_TITLE_KEY, item.getTitle());
+                    i.putExtra(SearchActivity.INTENT_ARTIST_KEY, item.getArtist());
                     startActivity(i);
                 }
             }

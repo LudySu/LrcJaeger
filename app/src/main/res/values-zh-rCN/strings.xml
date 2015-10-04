@@ -10,11 +10,8 @@
 
     <string name="toast_no_network_connection">无 WiFi 或 3G 网络连接</string>
     <string name="toast_delete_err">删除歌词文件失败</string>
-    <string name="toast_download_ok">下载成功</string>
-    <string name="toast_lrc_not_found">未找到歌词</string>
     <string name="toast_lrc_downloaded">已成功下载 %1$d/%2$d 项</string>
 
-    <string name="search_dialog">搜索歌词</string>
     <string name="et_search_hint_title">标题</string>
     <string name="et_search_hint_artist">艺术家（可不填）</string>
 
@@ -27,5 +24,13 @@
     <string name="title_lrc_path">歌词路径：</string>
     <string name="action_text_only">隐藏时间轴</string>
     <string name="action_whole_lrc">完整歌词</string>
+
+    <!-- SearchActivity -->
+    <string name="title_search_activity">搜索歌词</string>
+    <string name="btn_search">开始搜索</string>
+    <string name="msg_lrc_not_found">未找到歌词</string>
+    <string name="msg_lrc_downloading">正在下载，请稍候......</string>
+    <string name="msg_lrc_searching">正在搜索，请稍候......</string>
+    <string name="toast_download_ok">下载成功</string>
 
 </resources>

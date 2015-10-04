@@ -6,4 +6,6 @@
     <dimen name="text_size_large">30sp</dimen>
     <dimen name="text_size_main">16sp</dimen>
     <dimen name="text_size_sub">12sp</dimen>
+
+    <dimen name="items_vertical_margin">5dp</dimen>
 </resources>
