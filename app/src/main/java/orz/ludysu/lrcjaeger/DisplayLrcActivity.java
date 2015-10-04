@@ -41,11 +41,20 @@ public class DisplayLrcActivity extends AppCompatActivity {
 
         TextView path = (TextView) findViewById(R.id.tv_lrc_path);
         path.setText(getString(R.string.title_lrc_path) + mSong.getLrcPath());
+    }
 
+    @Override
+    protected void onResume() {
         TextView tv = (TextView) findViewById(R.id.tv_lrc_content);
-        mLrcContent = i.getStringExtra(Constants.INTENT_KEY_CONTENT);
+        mLrcContent = "Cannot read file: IO Error";
+        try {
+            mLrcContent = Utils.readFile(mSong.getLrcPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         tv.setText(mLrcContent);
         tv.setMovementMethod(new ScrollingMovementMethod());
+        super.onResume();
     }
 
     @Override
@@ -111,6 +120,10 @@ public class DisplayLrcActivity extends AppCompatActivity {
                 break;
 
             case R.id.action_search_lrc:
+                Intent i = new Intent();
+                i.setClass(this, SearchActivity.class);
+                i.putExtra(Constants.INTENT_KEY_OBJECT, mSong);
+                startActivity(i);
                 break;
 
             case R.id.action_edit_lrc:

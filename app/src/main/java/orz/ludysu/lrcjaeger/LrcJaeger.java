@@ -70,16 +70,8 @@ public class LrcJaeger extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SongItem item = mAdapter.getItem(position);
                 if (item.isHasLrc()) { // display lyric content
-                    String lrc = "Cannot read file: IO Error";
-                    try {
-                        lrc = Utils.readFile(item.getLrcPath());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
                     Intent i = new Intent();
                     i.setClass(LrcJaeger.this, DisplayLrcActivity.class);
-                    i.putExtra(Constants.INTENT_KEY_CONTENT, lrc);
                     i.putExtra(Constants.INTENT_KEY_OBJECT, item);
                     startActivity(i);
                 } else { // start a search activity
