@@ -26,9 +26,6 @@ import android.widget.Toast;
 
 public class SearchActivity extends AppCompatActivity {
     private static final String TAG = "SearchActivity";
-
-    public static final String INTENT_TITLE_KEY = "title";
-    public static final String INTENT_ARTIST_KEY = "artist";
     
     private static final int MSG_QUERY = 1;
     private static final int MSG_DOWNLOAD = 2;
@@ -45,12 +42,10 @@ public class SearchActivity extends AppCompatActivity {
         bar.setDisplayHomeAsUpEnabled(false);
         
         Intent i = getIntent();
-        Uri uri = i.getData();
-        String title = i.getStringExtra(INTENT_TITLE_KEY);
-        bar.setTitle(title.length() > 0 ? title : getString(R.string.title_search_activity));
-        String artist = i.getStringExtra(INTENT_ARTIST_KEY);
-        mSongItem = new SongItem(title, artist, uri.getPath());
+        mSongItem = i.getParcelableExtra(Constants.INTENT_KEY_OBJECT);
         Log.v(TAG, "incoming intent data " + mSongItem);
+
+        bar.setTitle(mSongItem.getTitle());
         
         HandlerThread ht = new HandlerThread("single-download");
         ht.start();

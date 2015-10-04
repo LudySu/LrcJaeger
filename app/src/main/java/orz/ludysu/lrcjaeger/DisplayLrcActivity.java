@@ -1,12 +1,10 @@
 package orz.ludysu.lrcjaeger;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,18 +21,12 @@ import java.util.regex.Pattern;
 public class DisplayLrcActivity extends AppCompatActivity {
 
     private static final String TAG = "DisplayLrcActivity";
-    private static String LINE_SEPARATOR = System.getProperty("line.separator");
 
-    public static final String INTENT_CONTENT_KEY = "lrc_content";
-    public static final String INTENT_TITLE_KEY = "lrc_title";
-    public static final String INTENT_PATH_KEY = "lrc_path";
 
     private String mLrcContent;
     private String mTextContent;
     private boolean mIsInTextOnlyMode = false;
-    private String mLrcPath;
-    private String mTitle;
-    private String mArtist;
+    private SongItem mSong;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,15 +36,14 @@ public class DisplayLrcActivity extends AppCompatActivity {
         bar.setDisplayHomeAsUpEnabled(false);
 
         Intent i = getIntent();
-        mTitle = i.getStringExtra(INTENT_TITLE_KEY);
-        bar.setTitle(mTitle);
+        mSong = i.getParcelableExtra(Constants.INTENT_KEY_OBJECT);
+        bar.setTitle(mSong.getTitle());
 
         TextView path = (TextView) findViewById(R.id.tv_lrc_path);
-        mLrcPath = i.getStringExtra(INTENT_PATH_KEY);
-        path.setText(getString(R.string.title_lrc_path) + mLrcPath);
+        path.setText(getString(R.string.title_lrc_path) + mSong.getLrcPath());
 
         TextView tv = (TextView) findViewById(R.id.tv_lrc_content);
-        mLrcContent = i.getStringExtra(INTENT_CONTENT_KEY);
+        mLrcContent = i.getStringExtra(Constants.INTENT_KEY_CONTENT);
         tv.setText(mLrcContent);
         tv.setMovementMethod(new ScrollingMovementMethod());
     }
@@ -84,7 +75,7 @@ public class DisplayLrcActivity extends AppCompatActivity {
                                 boolean matches = m.find();
                                 if (matches) {
                                     sb.append(m.group(1));
-                                    sb.append(LINE_SEPARATOR);
+                                    sb.append(Constants.LINE_SEPARATOR);
                                 }
                             }
                         } catch (IOException ex) {
@@ -109,8 +100,9 @@ public class DisplayLrcActivity extends AppCompatActivity {
                 break;
 
             case R.id.action_delete_lrc:
-                if (mLrcPath.length() > 0) {
-                    boolean ok = (new File(mLrcPath)).delete();
+                String lrcPath = mSong.getLrcPath();
+                if (lrcPath.length() > 0) {
+                    boolean ok = (new File(lrcPath)).delete();
                     if (!ok) {
                         Toast.makeText(this, getString(R.string.toast_delete_err), Toast.LENGTH_SHORT);
                     }

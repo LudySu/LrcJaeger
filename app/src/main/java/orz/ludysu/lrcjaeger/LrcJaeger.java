@@ -8,7 +8,6 @@ import java.util.Set;
 
 import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,12 +18,9 @@ import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -69,12 +65,11 @@ public class LrcJaeger extends AppCompatActivity {
 
         mListView.setAdapter(mAdapter);
 
-        // show a dialog that display lyric
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SongItem item = mAdapter.getItem(position);
-                if (item.isHasLrc()) {
+                if (item.isHasLrc()) { // display lyric content
                     String lrc = "Cannot read file: IO Error";
                     try {
                         lrc = Utils.readFile(item.getLrcPath());
@@ -84,17 +79,13 @@ public class LrcJaeger extends AppCompatActivity {
 
                     Intent i = new Intent();
                     i.setClass(LrcJaeger.this, DisplayLrcActivity.class);
-                    i.putExtra(DisplayLrcActivity.INTENT_CONTENT_KEY, lrc);
-                    // FIXME use file name if no title
-                    i.putExtra(DisplayLrcActivity.INTENT_TITLE_KEY, item.getTitle());
-                    i.putExtra(DisplayLrcActivity.INTENT_PATH_KEY, item.getLrcPath());
+                    i.putExtra(Constants.INTENT_KEY_CONTENT, lrc);
+                    i.putExtra(Constants.INTENT_KEY_OBJECT, item);
                     startActivity(i);
-                } else {
+                } else { // start a search activity
                     Intent i = new Intent();
                     i.setClass(LrcJaeger.this, SearchActivity.class);
-                    i.setData(Uri.parse("file://" + item.getPath()));
-                    i.putExtra(SearchActivity.INTENT_TITLE_KEY, item.getTitle());
-                    i.putExtra(SearchActivity.INTENT_ARTIST_KEY, item.getArtist());
+                    i.putExtra(Constants.INTENT_KEY_OBJECT, item);
                     startActivity(i);
                 }
             }

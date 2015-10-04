@@ -72,6 +72,16 @@ public class Utils {
         return null;
     }
 
+    public static String getFileNameWithoutExtension(String path) {
+        int lastSlash = path.lastIndexOf("/");
+        if (lastSlash <= 0) {
+            return "";
+        }
+        int lastDot = path.lastIndexOf(".");
+        lastDot = lastDot > lastSlash ? lastDot : path.length();
+        return path.substring(lastSlash + 1, lastDot);
+    }
+
     /**
      * Load hidden folders set by user from shared prefs
      */
