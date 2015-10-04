@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "orz.ludysu.lrcjaeger"
         minSdkVersion 7
-        targetSdkVersion 23
+        targetSdkVersion 22
     }
 
     buildTypes {
