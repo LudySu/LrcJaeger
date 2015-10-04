@@ -41,7 +41,7 @@ public class DisplayLrcActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_lrc);
         ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
+        bar.setDisplayHomeAsUpEnabled(false);
 
         Intent i = getIntent();
         mTitle = i.getStringExtra(INTENT_TITLE_KEY);
