@@ -67,14 +67,14 @@ public class DisplayLrcActivity extends AppCompatActivity {
                             BufferedReader reader = new BufferedReader(new StringReader(mLrcContent));
 
                             // match lines in .lrc format like: [00:06.78]lyric content
-                            Pattern p = Pattern.compile("^[\\[\\d{2}:\\d{2}\\.\\d{2}\\]]+(.*)");
+                            Pattern p = Pattern.compile("^(\\[\\d{2}:\\d{2}\\.\\d{2}\\])+(.*)");
 
                             String line;
                             while ((line = reader.readLine()) != null) {
                                 Matcher m = p.matcher(line);
                                 boolean matches = m.find();
                                 if (matches) {
-                                    sb.append(m.group(1));
+                                    sb.append(m.group(2));
                                     sb.append(Constants.LINE_SEPARATOR);
                                 }
                             }
