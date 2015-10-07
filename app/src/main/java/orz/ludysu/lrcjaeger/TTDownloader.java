@@ -1,5 +1,13 @@
 package orz.ludysu.lrcjaeger;
 
+import android.util.Log;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -15,14 +23,6 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import android.util.Log;
 
 /**
  * Utils for quering and getting lyrics from qianqianjingting server.
@@ -137,8 +137,8 @@ public class TTDownloader {
         return false;
     }
     
-    public static int DOWNLLOAD_SHORTEST_NAME = 1; // FIXME
-    public static int DOWNLLOAD_CONTAIN_NAME = 2;
+    public static int DOWNLOAD_SHORTEST_NAME = 1; // FIXME
+    public static int DOWNLOAD_CONTAIN_NAME = 2;
 
     /**
      * Batch download a bunch of lyrics
@@ -151,7 +151,7 @@ public class TTDownloader {
     public static boolean download(ArrayList<QueryResult> items, String lrcPath, int flag) {
         int index = -1;
         int limit = 0;
-        if (flag == DOWNLLOAD_SHORTEST_NAME) {
+        if (flag == DOWNLOAD_SHORTEST_NAME) {
             for (int i = 0; i < items.size(); i++) {
                 QueryResult item = items.get(i);
                 int size = item.mArtist.length() + item.mTitle.length();
@@ -160,7 +160,7 @@ public class TTDownloader {
                     index = i;
                 }
             }
-        } else if (flag == DOWNLLOAD_CONTAIN_NAME) {
+        } else if (flag == DOWNLOAD_CONTAIN_NAME) {
             for (int i = 0; i < items.size(); i++) {
                 QueryResult item = items.get(i);
                 int size = item.mArtist.length() + item.mTitle.length();

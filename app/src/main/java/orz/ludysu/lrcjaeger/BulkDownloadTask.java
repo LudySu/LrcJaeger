@@ -1,9 +1,9 @@
 package orz.ludysu.lrcjaeger;
 
-import java.util.ArrayList;
-
 import android.os.AsyncTask;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 public class BulkDownloadTask extends AsyncTask<SongItem, Integer, Integer> {
     private static final String TAG = "LrcJaeger/Download";
@@ -36,7 +36,7 @@ public class BulkDownloadTask extends AsyncTask<SongItem, Integer, Integer> {
             ArrayList<QueryResult> lrcs = TTDownloader.query(item.getArtist(), item.getTitle());
             if (lrcs != null && lrcs.size() > 0) {
                 boolean result = TTDownloader.download(lrcs, item.getLrcPath(),
-                        TTDownloader.DOWNLLOAD_SHORTEST_NAME);
+                        TTDownloader.DOWNLOAD_CONTAIN_NAME);
                 downloaded = result ? downloaded + 1: downloaded;   
             }
             publishProgress(100 * count / total);
