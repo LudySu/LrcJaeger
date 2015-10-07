@@ -18,11 +18,17 @@
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:textSize="@dimen/text_size_sub"/>
 
-    <TextView
-        android:id="@+id/tv_lrc_content"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="@dimen/text_size_main"
-        android:scrollbars="vertical"/>
+        android:overScrollMode="always">
+
+        <TextView
+            android:id="@+id/tv_lrc_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/text_size_main"
+            android:scrollbars="vertical"/>
+    </ScrollView>
 
 </LinearLayout>

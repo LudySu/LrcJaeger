@@ -7,7 +7,7 @@
     <ListView
         android:id="@+id/lv_song_items" 
         android:layout_width="match_parent"
-        android:layout_height="match_parent" 
+        android:layout_height="match_parent"
         android:paddingTop="3dp"
         android:clickable="true" />
 

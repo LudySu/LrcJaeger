@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -53,7 +52,6 @@ public class DisplayLrcActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         tv.setText(mLrcContent);
-        tv.setMovementMethod(new ScrollingMovementMethod());
         super.onResume();
     }
 
@@ -126,8 +124,8 @@ public class DisplayLrcActivity extends AppCompatActivity {
                 startActivity(i);
                 break;
 
-            case R.id.action_edit_lrc:
-                break;
+//            case R.id.action_edit_lrc:
+//                break;
 
             default:
                 return super.onOptionsItemSelected(item);

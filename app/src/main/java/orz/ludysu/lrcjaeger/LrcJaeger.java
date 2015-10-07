@@ -1,16 +1,7 @@
 package orz.ludysu.lrcjaeger;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
-
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,6 +17,13 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import orz.ludysu.lrcjaeger.SongItemAdapter.OnLrcClickListener;
 
 // Main activity
 public class LrcJaeger extends AppCompatActivity {

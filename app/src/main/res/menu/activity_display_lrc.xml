@@ -2,19 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:displaylrc="http://schemas.android.com/apk/res-auto" >
 
+    <item android:id="@+id/action_delete_lrc"
+          displaylrc:showAsAction="always"
+          android:title="@string/action_delete_lrc" />
+
     <item android:id="@+id/action_text_only"
           displaylrc:showAsAction="always"
           android:title="@string/action_text_only" />
-
-    <item android:id="@+id/action_delete_lrc"
-          displaylrc:showAsAction="ifRoom"
-          android:title="@string/action_delete_lrc" />
 
     <item android:id="@+id/action_search_lrc"
           displaylrc:showAsAction="never"
           android:title="@string/title_search_activity" />
 
-    <item android:id="@+id/action_edit_lrc"
+    <!--<item android:id="@+id/action_edit_lrc"
           displaylrc:showAsAction="never"
-          android:title="@string/action_edit_lrc" />
+          android:title="@string/action_edit_lrc" />-->
 </menu>
