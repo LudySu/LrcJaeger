@@ -1,0 +1,27 @@
+language: android
+android:
+  components:
+  - tools
+  - platform-tools
+  - build-tools-23.0.1
+  - android-23
+  - extra-android-support
+
+  licenses:
+  - 'android-sdk-license.*'
+
+jdk:
+  - openjdk7
+  - oraclejdk7
+
+# Specify at least one system image,
+# if you need to run emulator(s) during your tests
+  - sys-img-armeabi-v7a-android-23
+  - sys-img-x86-android-23
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
