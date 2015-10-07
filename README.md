@@ -1,10 +1,12 @@
 # LrcJaeger([Google Play](https://play.google.com/store/apps/details?id=orz.ludysu.lrcjaeger))
 
-![](docs/web_hi_res_256.png)
+[![Build Status](https://travis-ci.org/LudySu/LrcJaeger.svg?branch=master)](https://travis-ci.org/LudySu/LrcJaeger)
 
 LrcJaeger - A lyrics batch downloader for Android, which is great for ACG songs. Focus on lrc searching and downloading, no any other function. 
 
 歌词猎手 - Android用歌词批量下载软件，ACG动漫歌词非常齐全更新快，中文歌词也很全。专注歌词搜索与下载，无其他任何功能。 
+
+![](docs/web_hi_res_256.png)
 
 ## Update（更新信息）
 
