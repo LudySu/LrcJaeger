@@ -43,7 +43,9 @@ Import the source folder into Eclipse and build and run. Or you can download the
 
 latest release [APK from GitHub](https://github.com/LudySu/LrcJaeger/releases)
 
-最新发布 [从GitHub下载APK](https://github.com/LudySu/LrcJaeger/releases)
+最新发布 [从 GitHub 下载 APK](https://github.com/LudySu/LrcJaeger/releases)
+
+国内用户也可以用 [百度网盘下载 APK](http://pan.baidu.com/s/1sj22N6H#path=%252FLrcJaeger)
 
 ## License（许可）
 
