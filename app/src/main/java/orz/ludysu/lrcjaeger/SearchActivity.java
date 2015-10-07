@@ -1,10 +1,7 @@
 package orz.ludysu.lrcjaeger;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -24,6 +21,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class SearchActivity extends AppCompatActivity {
     private static final String TAG = "SearchActivity";
     
@@ -33,6 +32,8 @@ public class SearchActivity extends AppCompatActivity {
     private BackgroundHandler mHandler;
     private SongItem mSongItem;
     private ListView mListView;
+    private MyHandler mUiHandler;
+    private ArrayList<QueryResult> mQueryResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class SearchActivity extends AppCompatActivity {
         HandlerThread ht = new HandlerThread("single-download");
         ht.start();
         mHandler = new BackgroundHandler(ht.getLooper());
+        mUiHandler = new MyHandler(this);
         
         final EditText titleEt = (EditText) findViewById(R.id.et_title);
         titleEt.setText(mSongItem.getTitle());
@@ -95,8 +97,8 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     /**
-     * Make a adapter that contains a simple message to diaplay
-     * @param resId resId of the message to diaplay
+     * Make a adapter that contains a simple text message to diaplay
+     * @param resId resId of the message to display in ListView
      */
     private ArrayAdapter<String> makeSimpleMessageAdapter(int resId) {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchActivity.this,
@@ -110,31 +112,42 @@ public class SearchActivity extends AppCompatActivity {
         super.onDestroy();
     }
     
-    private ArrayList<QueryResult> mQueryResult;
-    private Handler mUiHandler = new Handler() {
+
+    private class MyHandler extends UiHandler<SearchActivity> {
+
+        public MyHandler(SearchActivity activity) {
+            super(activity);
+        }
+
         @Override
         public void handleMessage(Message msg) {
+            final SearchActivity activity = super.getActivity();
+            if (activity == null) {
+                return;
+            }
+
             switch (msg.what) {
-            case MSG_QUERY:
-                if (mQueryResult.size() > 0) {
-                    ArrayAdapter<QueryResult> adapter = new ArrayAdapter<>(SearchActivity.this,
-                            android.R.layout.simple_list_item_1, mQueryResult);
-                    mListView.setAdapter(adapter);
-                } else {
-                    mListView.setAdapter(makeSimpleMessageAdapter(R.string.msg_lrc_not_found));
-                }
-                break;
-            case MSG_DOWNLOAD:
-                Toast.makeText(SearchActivity.this, R.string.toast_download_ok, Toast.LENGTH_SHORT).show();
-                finish();
-                break;
-            default:
-                break;
+                case MSG_QUERY:
+                    if (activity.mQueryResult.size() > 0) {
+                        ArrayAdapter<QueryResult> adapter = new ArrayAdapter<>(activity,
+                                android.R.layout.simple_list_item_1, activity.mQueryResult);
+                        activity.mListView.setAdapter(adapter);
+                    } else {
+                        activity.mListView.setAdapter(makeSimpleMessageAdapter(R.string.msg_lrc_not_found));
+                    }
+                    break;
+                case MSG_DOWNLOAD:
+                    Toast.makeText(SearchActivity.this, R.string.toast_download_ok, Toast.LENGTH_SHORT).show();
+                    finish();
+                    break;
+                default:
+                    break;
             }
         }
     };
     
     private class BackgroundHandler extends Handler {
+
         public BackgroundHandler(Looper l) {
             super(l);
         }
@@ -162,4 +175,5 @@ public class SearchActivity extends AppCompatActivity {
             }
         }
     };
+
 }

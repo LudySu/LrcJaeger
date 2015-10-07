@@ -3,7 +3,6 @@ package orz.ludysu.lrcjaeger;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
@@ -18,7 +17,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,7 +40,7 @@ public class LrcJaeger extends AppCompatActivity {
     private MenuItem mDownAllButton;
     private ProgressBar mProgressBar;
     private BulkDownloadTask mTask;
-    private UiHandler mUiHandler;
+    private MyHandler mUiHandler;
     private Set<String> mAllFolders = new HashSet<>();
     
     @Override
@@ -51,7 +49,7 @@ public class LrcJaeger extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_jaeger);
 
-        mUiHandler = new UiHandler(this);
+        mUiHandler = new MyHandler(this);
         mListView = (ListView) findViewById(R.id.lv_song_items);
         mAdapter = new SongItemAdapter(this, new ArrayList<SongItem>());
         mAdapter.setLrcClickListener(new OnLrcClickListener() {
@@ -152,18 +150,16 @@ public class LrcJaeger extends AppCompatActivity {
         return true;
     }
     
-    private static class UiHandler extends Handler {
-        WeakReference<LrcJaeger> mActivity = null;
+    private class MyHandler extends UiHandler<LrcJaeger> {
 
-        public UiHandler(LrcJaeger activity) {
-            mActivity = new WeakReference<>(activity);
+        public MyHandler(LrcJaeger activity) {
+            super(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            final LrcJaeger activity = mActivity.get();
+            final LrcJaeger activity = super.getActivity();
             if (activity == null) {
-                Log.e(TAG, "Cannot handle message: activity has been destroyed");
                 return;
             }
 
@@ -220,7 +216,7 @@ public class LrcJaeger extends AppCompatActivity {
 
                                 String text = String.format(activity.getString(R.string.toast_lrc_downloaded),
                                         downloaded, listAll.size());
-                                Toast.makeText(activity, text, Toast.LENGTH_SHORT);
+                                Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
                             }
 
                             @Override

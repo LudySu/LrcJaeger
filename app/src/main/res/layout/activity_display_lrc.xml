@@ -20,13 +20,12 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:overScrollMode="always">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/tv_lrc_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:textSize="@dimen/text_size_main"
             android:scrollbars="vertical"/>
     </ScrollView>
