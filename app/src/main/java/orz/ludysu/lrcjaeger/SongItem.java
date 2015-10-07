@@ -2,10 +2,13 @@ package orz.ludysu.lrcjaeger;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.File;
 
 public class SongItem implements Parcelable {
+    private static final String TAG = "SongItem";
+
     private String mTitle;
     private String mArtist;
     private String mPath;
@@ -55,6 +58,10 @@ public class SongItem implements Parcelable {
     }
     
     public boolean updateStatus() {
+        if (mLrcPath == null) {
+            Log.e(TAG, "mLrcPath is null");
+            return false;
+        }
         boolean hasLrc = (new File(mLrcPath)).exists() ? true : false;
         boolean changed = hasLrc == mHasLrc;
         mHasLrc = hasLrc;
