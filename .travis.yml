@@ -6,6 +6,7 @@ android:
   - build-tools-23.0.1
   - android-23
   - extra-android-support
+  # for appcompat
   - extra-android-m2repository
 
   licenses:

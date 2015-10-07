@@ -10,6 +10,10 @@ android {
         targetSdkVersion 22
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     buildTypes {
         release {
             minifyEnabled false
