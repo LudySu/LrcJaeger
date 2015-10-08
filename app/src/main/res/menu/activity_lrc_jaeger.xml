@@ -2,10 +2,12 @@
       xmlns:lrcjaeger="http://schemas.android.com/apk/res-auto" >
 
     <item android:id="@+id/action_downall"
+          android:icon="@drawable/ic_file_download_black_48dp"
           lrcjaeger:showAsAction="ifRoom"
           android:title="@string/action_downall" />
 
     <item android:id="@+id/action_hide"
+          android:icon="@drawable/ic_folder_hidden_black_48dp"
           lrcjaeger:showAsAction="ifRoom"
           android:title="@string/action_hide_folder" />
 

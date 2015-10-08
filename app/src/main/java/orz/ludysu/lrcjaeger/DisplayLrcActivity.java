@@ -96,12 +96,14 @@ public class DisplayLrcActivity extends AppCompatActivity {
                     tv.setText(mTextContent);
 
                     item.setTitle(R.string.action_whole_lrc);
+                    item.setIcon(R.drawable.ic_timer_black_48dp);
                     mIsInTextOnlyMode = true;
                 } else { // toggle to whole lrc content mode including time tag
                     TextView tv = (TextView) findViewById(R.id.tv_lrc_content);
                     tv.setText(mLrcContent);
 
                     item.setTitle(R.string.action_text_only);
+                    item.setIcon(R.drawable.ic_timer_off_black_48dp);
                     mIsInTextOnlyMode = false;
                 }
                 break;
