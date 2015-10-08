@@ -101,10 +101,9 @@ public class SearchActivity extends AppCompatActivity {
      * @param resId resId of the message to display in ListView
      */
     private ArrayAdapter<String> makeSimpleMessageAdapter(int resId) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchActivity.this,
+        return new ArrayAdapter<>(SearchActivity.this,
                 android.R.layout.simple_list_item_1,
                 new String[]{getString(resId)});
-        return adapter;
     }
     
     @Override
@@ -113,7 +112,7 @@ public class SearchActivity extends AppCompatActivity {
     }
     
 
-    private class MyHandler extends UiHandler<SearchActivity> {
+    private static class MyHandler extends UiHandler<SearchActivity> {
 
         public MyHandler(SearchActivity activity) {
             super(activity);
@@ -133,12 +132,12 @@ public class SearchActivity extends AppCompatActivity {
                                 android.R.layout.simple_list_item_1, activity.mQueryResult);
                         activity.mListView.setAdapter(adapter);
                     } else {
-                        activity.mListView.setAdapter(makeSimpleMessageAdapter(R.string.msg_lrc_not_found));
+                        activity.mListView.setAdapter(activity.makeSimpleMessageAdapter(R.string.msg_lrc_not_found));
                     }
                     break;
                 case MSG_DOWNLOAD:
-                    Toast.makeText(SearchActivity.this, R.string.toast_download_ok, Toast.LENGTH_SHORT).show();
-                    finish();
+                    Toast.makeText(activity, R.string.toast_download_ok, Toast.LENGTH_SHORT).show();
+                    activity.finish();
                     break;
                 default:
                     break;

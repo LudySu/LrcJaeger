@@ -96,7 +96,7 @@ public class LrcJaeger extends AppCompatActivity {
         // initialize song list
         mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
 
-        // update lrc icons
+        // update lrc icons which indicate whether the song has a lrc
         mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
     }
 
@@ -138,7 +138,7 @@ public class LrcJaeger extends AppCompatActivity {
             case R.id.action_hide:
                 Intent i = new Intent();
                 i.setClass(this, HideFoldersActivity.class);
-                ArrayList<String> list = new ArrayList();
+                ArrayList<String> list = new ArrayList<>();
                 list.addAll(mAllFolders);
                 i.putStringArrayListExtra(HideFoldersActivity.INTENT_DATA_KEY, list);
                 startActivity(i);
@@ -150,7 +150,7 @@ public class LrcJaeger extends AppCompatActivity {
         return true;
     }
     
-    private class MyHandler extends UiHandler<LrcJaeger> {
+    private static class MyHandler extends UiHandler<LrcJaeger> {
 
         public MyHandler(LrcJaeger activity) {
             super(activity);

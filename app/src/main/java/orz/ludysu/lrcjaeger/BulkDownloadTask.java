@@ -23,6 +23,7 @@ public class BulkDownloadTask extends AsyncTask<SongItem, Integer, Integer> {
     protected Integer doInBackground(SongItem... list) { // on an independent thread
         if (list == null || list.length <= 0) {
             Log.w(TAG, "items null");
+            return 0;
         }
         int total = list.length;
         int count = 0;

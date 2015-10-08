@@ -50,7 +50,7 @@ public class SongItem implements Parcelable {
         mPath = path;
         
         mLrcPath = getLrcPath(path);
-        mHasLrc = mLrcPath == null ? false : (new File(mLrcPath)).exists();
+        mHasLrc = mLrcPath != null && (new File(mLrcPath)).exists();
     }
 
     private SongItem(Parcel in) {
@@ -62,7 +62,7 @@ public class SongItem implements Parcelable {
             Log.e(TAG, "mLrcPath is null");
             return false;
         }
-        boolean hasLrc = (new File(mLrcPath)).exists() ? true : false;
+        boolean hasLrc = (new File(mLrcPath)).exists();
         boolean changed = hasLrc == mHasLrc;
         mHasLrc = hasLrc;
         return changed;

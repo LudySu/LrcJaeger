@@ -39,7 +39,7 @@ public class DisplayLrcActivity extends AppCompatActivity {
         bar.setTitle(mSong.getTitle());
 
         TextView path = (TextView) findViewById(R.id.tv_lrc_path);
-        path.setText(getString(R.string.title_lrc_path) + mSong.getLrcPath());
+        path.setText(String.format(getString(R.string.title_lrc_path), mSong.getLrcPath()));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class DisplayLrcActivity extends AppCompatActivity {
                 if (lrcPath.length() > 0) {
                     boolean ok = (new File(lrcPath)).delete();
                     if (!ok) {
-                        Toast.makeText(this, getString(R.string.toast_delete_err), Toast.LENGTH_SHORT);
+                        Toast.makeText(this, getString(R.string.toast_delete_err), Toast.LENGTH_SHORT).show();
                     }
                     finish();
                 }
