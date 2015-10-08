@@ -8,7 +8,7 @@
           android:title="@string/action_delete_lrc" />
 
     <item android:id="@+id/action_text_only"
-          android:icon="@drawable/ic_timer_off_black_48dp"
+          android:icon="@drawable/ic_lrc_notime_black_48dp"
           displaylrc:showAsAction="always"
           android:title="@string/action_text_only" />
 
