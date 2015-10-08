@@ -7,8 +7,9 @@ import android.util.Log;
 import java.lang.ref.WeakReference;
 
 /**
- * 
- * @param <T>
+ * Holde a <code>WeakReference</code> to the outer <code>Activity</code> to avoid leak
+ *
+ * @param <T> your own derived <code>Activity</code>
  */
 public class UiHandler<T extends Activity> extends Handler {
     WeakReference<T> mActivity = null;

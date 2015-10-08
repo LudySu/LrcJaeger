@@ -40,7 +40,7 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actitivy_search_lrc);
         ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(false);
+        bar.setDisplayHomeAsUpEnabled(true);
         
         Intent i = getIntent();
         mSongItem = i.getParcelableExtra(Constants.INTENT_KEY_OBJECT);

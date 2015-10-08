@@ -32,7 +32,7 @@ public class DisplayLrcActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_lrc);
         ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(false);
+        bar.setDisplayHomeAsUpEnabled(true);
 
         Intent i = getIntent();
         mSong = i.getParcelableExtra(Constants.INTENT_KEY_OBJECT);
@@ -73,7 +73,7 @@ public class DisplayLrcActivity extends AppCompatActivity {
                         try {
                             BufferedReader reader = new BufferedReader(new StringReader(mLrcContent));
 
-                            // match lines in .lrc format like: [00:06.78]lyric content
+                            // match lines in .lrc format like: [00:06.78][00:26.78]lyric content
                             Pattern p = Pattern.compile("^(\\[\\d{2}:\\d{2}\\.\\d{2}\\])+(.*)");
 
                             String line;
