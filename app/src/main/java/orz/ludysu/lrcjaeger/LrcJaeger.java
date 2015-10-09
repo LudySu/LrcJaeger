@@ -7,13 +7,14 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -35,13 +36,14 @@ public class LrcJaeger extends AppCompatActivity {
     private static final int MSG_UPDATE_LRC_ICON = 21;
     private static final int MSG_REMOVE_ITEM_FROM_LIST = 31;
 
-    private ListView mListView;
+    private MultiChoiceListView mListView;
     private SongItemAdapter mAdapter;
     private MenuItem mDownAllButton;
     private ProgressBar mProgressBar;
     private BulkDownloadTask mTask;
     private MyHandler mUiHandler;
     private Set<String> mAllFolders = new HashSet<>();
+    private ActionMode mActionMode;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +52,12 @@ public class LrcJaeger extends AppCompatActivity {
         setContentView(R.layout.activity_lrc_jaeger);
 
         mUiHandler = new MyHandler(this);
-        mListView = (ListView) findViewById(R.id.lv_song_items);
+        mListView = (MultiChoiceListView) findViewById(R.id.lv_song_items);
         mAdapter = new SongItemAdapter(this, new ArrayList<SongItem>());
         mAdapter.setLrcClickListener(new OnLrcClickListener() {
             @Override
-            public void OnLrcClick(int position) {
-                // FIXME
+            public void OnLrcClick(int position, View convertView, ViewGroup parent) {
+                mListView.toggleItemChecked(position);
             }
         });
 
@@ -64,6 +66,10 @@ public class LrcJaeger extends AppCompatActivity {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mListView.getCheckedCount() > 0) {
+                    Log.v(TAG, "in check mode, ignore click");
+                    return;
+                }
                 SongItem item = mAdapter.getItem(position);
                 if (item.isHasLrc()) { // display lyric content
                     Intent i = new Intent();
@@ -83,11 +89,84 @@ public class LrcJaeger extends AppCompatActivity {
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mListView.getCheckedCount() > 0) {
+                    Log.v(TAG, "in check mode, ignore long click");
+                    return true;
+                }
+
+                if (mActionMode != null) {
+                    return false;
+                }
+
+                mActionMode = startSupportActionMode(mActionModeCallback);
                 return true;
             }
         });
+
+        mListView.setOnItemCheckedListener(new MultiChoiceListView.OnItemCheckedListener() {
+            @Override
+            public void onItemCheckedStateChanged(View view, int position, boolean checked) {
+                Log.v(TAG, "onItemCheckedStateChanged " + position + " - " + checked);
+                if (mActionMode == null) {
+                    mActionMode = startSupportActionMode(mActionModeCallback);
+                }
+                mAdapter.setItemChecked(view, checked);
+            }
+
+            @Override
+            public void onNothingChecked() {
+                Log.v(TAG, "onNothingChecked");
+                mAdapter.clearChoice();
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+        });
+
     }
-    
+
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.activity_lrc_jaeger_contextual, menu);
+            return true;
+        }
+
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_delete_all_lrc:
+                    return true;
+
+                case R.id.action_downall_context:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+            mListView.clearChoices();
+            mAdapter.clearChoice();
+        }
+    };
+
     @Override
     protected void onResume() {
         Log.v(TAG, "onResume");

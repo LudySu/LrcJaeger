@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     tools:context=".LrcJaeger" >
 
-    <ListView
+    <orz.ludysu.lrcjaeger.MultiChoiceListView
         android:id="@+id/lv_song_items" 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
