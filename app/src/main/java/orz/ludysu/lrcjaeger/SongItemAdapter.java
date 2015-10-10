@@ -20,7 +20,6 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
     private ArrayList<SongItem> mSongs;
     private OnLrcClickListener mLrcListener;
     private HashMap<Integer, View> mConvertViewMap = new HashMap<>();
-    private boolean mClearChoicePending = false;
     
     public interface OnLrcClickListener {
         public void OnLrcClick(int position, View convertView, ViewGroup parent);
@@ -36,7 +35,7 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         mLrcListener = l;
     }
 
-    public class ViewHolder {
+    private class ViewHolder {
         TextView mTitle;
         TextView mArtist;
         TextView mHasLrc;
@@ -44,11 +43,20 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         boolean mChecked;
     }
 
+    /**
+     * Change the icon of this item to indicate its checked status
+     *
+     * @param convertView
+     * @param checked
+     */
     public void setItemChecked(View convertView, boolean checked) {
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mChecked = checked;
     }
 
+    /**
+     * Change the icon of all items to unchecked state
+     */
     public void clearChoice() {
         Set<Map.Entry<Integer, View>> set = mConvertViewMap.entrySet();
         for (Map.Entry<Integer, View> entry : set) {
@@ -101,6 +109,12 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         });
         
         return convertView;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        mConvertViewMap.clear();
     }
 
 }

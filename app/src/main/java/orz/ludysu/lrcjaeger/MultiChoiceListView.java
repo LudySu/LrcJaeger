@@ -52,7 +52,7 @@ public class MultiChoiceListView extends ListView {
 
         Log.v("ListView", "checked items " + super.getCheckedItemPositions());
         View view = getChildAtAbsolutePos(position);
-        updateItemAtPosition(view, position, value);
+        updateViewAtPosition(view, position);
 
         if (mListener != null) {
             mListener.onItemCheckedStateChanged(view, position, value);
@@ -64,7 +64,7 @@ public class MultiChoiceListView extends ListView {
 
     private View getChildAtAbsolutePos(int position) {
         int visiblePosition = super.getFirstVisiblePosition();
-        return super.getChildAt(position - visiblePosition);
+        return getChildAt(position - visiblePosition);
     }
 
     public int getCheckedCount() {
@@ -92,7 +92,7 @@ public class MultiChoiceListView extends ListView {
         mCheckedCount = 0;
     }
 
-    private void updateItemAtPosition(View view, int position, boolean checked) {
+    private void updateViewAtPosition(View view, int position) {
         super.getAdapter().getView(position, view, this);
     }
 }

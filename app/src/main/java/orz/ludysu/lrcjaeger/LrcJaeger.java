@@ -222,11 +222,6 @@ public class LrcJaeger extends AppCompatActivity {
                     activity.mAdapter.notifyDataSetChanged();
                     break;
 
-                case MSG_REMOVE_ITEM_FROM_LIST:
-                    int pos = msg.arg1;
-                    activity.mAdapter.remove(activity.mAdapter.getItem(pos));
-                    break;
-
                 default:
                     throw new IllegalArgumentException("Unknown message code " + msg.what);
             }
