@@ -1,36 +1,34 @@
 package orz.ludysu.lrcjaeger;
 
 import android.content.Context;
+import android.support.v7.view.ActionMode;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import java.util.HashMap;
-
 /**
- * Because we target SDK 7 so need to take care of multi choice by ourselves, which is introduced
+ * Because we target SDK 7 so need to take care of multi choices by ourselves, which is introduced
  * from SDK 11
  */
 public class MultiChoiceListView extends ListView {
     private static final String TAG = "MultiChoiceListView";
 
-    public OnItemCheckedListener mListener;
-    private int mCheckedCount = 0;
-    private HashMap<Integer, Boolean> mCheckedStatus = new HashMap<>();
+    private OnItemCheckedListener mListener;
+    private SparseBooleanArray mCheckedStatus = new SparseBooleanArray();
 
-    public interface OnItemCheckedListener {
+    public interface OnItemCheckedListener extends ActionMode.Callback {
         /**
          * Called when an item is checked or unchecked during selection mode.
          *
-         * @param view the view of the checked item
+         * @param mode ActionMode object
          * @param position Adapter position of the item that was checked or unchecked
          * @param checked <code>true</code> if the item is now checked, <code>false</code>
          *                if the item is now unchecked.
          */
-        public void onItemCheckedStateChanged(View view, int position, boolean checked);
+        public void onItemCheckedStateChanged(ActionMode mode, int position, boolean checked);
 
         public void onNothingChecked();
     }
@@ -58,7 +56,6 @@ public class MultiChoiceListView extends ListView {
         s.setLrcClickListener(new SongItemAdapter.OnLrcClickListener() {
             @Override
             public void OnLrcClick(int position, View convertView, ViewGroup parent) {
-                Log.v(TAG, "lrc click " + position);
                 toggleItemChecked(position);
             }
         });
@@ -66,21 +63,19 @@ public class MultiChoiceListView extends ListView {
     }
 
     @Override
-    public void setItemChecked (int position, boolean value) {
-        mCheckedStatus.put(position, value);
+    public void setItemChecked(int position, boolean value) {
         if (value) {
-            mCheckedCount++;
+            mCheckedStatus.put(position, value);
         } else {
-            mCheckedCount--;
+            mCheckedStatus.delete(position);
         }
 
-        Log.v("ListView", "checked items " + super.getCheckedItemPositions());
         View view = getChildAtAbsolutePos(position);
         updateViewAtPosition(view, position, value);
 
         if (mListener != null) {
-            mListener.onItemCheckedStateChanged(view, position, value);
-            if (mCheckedCount == 0) {
+            mListener.onItemCheckedStateChanged(null, position, value);
+            if (getCheckedItemCount() == 0) {
                 mListener.onNothingChecked();
             }
         }
@@ -88,13 +83,17 @@ public class MultiChoiceListView extends ListView {
 
     @Override
     public int getCheckedItemCount() {
-        return mCheckedCount;
+        return mCheckedStatus.size();
+    }
+
+    @Override
+    public SparseBooleanArray getCheckedItemPositions () {
+        return mCheckedStatus;
     }
 
     @Override
     public boolean isItemChecked(int position) {
-        Boolean b = mCheckedStatus.get(position);
-        return b == null ? false : b;
+        return mCheckedStatus.get(position);
     }
 
     public void toggleItemChecked(int position) {
@@ -110,8 +109,10 @@ public class MultiChoiceListView extends ListView {
 
     @Override
     public void clearChoices() {
-        mCheckedCount = 0;
         mCheckedStatus.clear();
+        SongItemAdapter adapter = (SongItemAdapter) getAdapter();
+        adapter.clearChoices();
+
         int size = getChildCount();
         for (int i = 0; i < size; i++) {
             View v = getChildAtAbsolutePos(i);
@@ -119,14 +120,22 @@ public class MultiChoiceListView extends ListView {
         }
     }
 
+    /**
+     * If position > getLastVisiblePosition(), it will return null
+     *
+     * @param position
+     * @return
+     */
     private View getChildAtAbsolutePos(int position) {
-        int visiblePosition = super.getFirstVisiblePosition();
-        return getChildAt(position - visiblePosition);
+        int visibleStart = getFirstVisiblePosition();
+        return getChildAt(position - visibleStart);
     }
 
     private void updateViewAtPosition(View view, int position, boolean checked) {
         SongItemAdapter adapter = (SongItemAdapter) getAdapter();
-        adapter.setItemChecked(position, checked);
-        super.getAdapter().getView(position, view, this);
+        if (view != null) { // only update views within visible range
+            adapter.setItemChecked(view, position, checked);
+            super.getAdapter().getView(position, view, this);
+        }
     }
 }

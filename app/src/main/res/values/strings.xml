@@ -29,6 +29,7 @@
     <string name="action_delete_lrc">Delete lrc</string>
     <string name="action_edit_lrc">Edit lrc</string>
     <string name="msg_lrc_searching">Searching, please wait......</string>
+    <string name="action_items_checked">%1$d items</string>
 
 
 </resources>

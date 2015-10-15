@@ -7,6 +7,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,21 +18,22 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 // Main activity
 public class LrcJaeger extends AppCompatActivity {
+
     private static final String TAG = "LrcJaeger";
     private static final String[] PROJECTION = new String[] {"_id", "_data", "artist", "title"};
     
     private static final int MSG_QUERY_DB = 1;
     private static final int MSG_DOWNLOAD_ALL = 10;
-    private static final int MSG_DOWNLOAD_ITEM = 11;
+    private static final int MSG_DOWNLOAD_ITEMS = 11;
     private static final int MSG_UPDATE_LRC_ICON_ALL = 20;
     private static final int MSG_UPDATE_LRC_ICON = 21;
-    private static final int MSG_REMOVE_ITEM_FROM_LIST = 31;
 
     private ArrayAdapter mAdapter;
     private MenuItem mDownAllButton;
@@ -52,25 +54,92 @@ public class LrcJaeger extends AppCompatActivity {
         MultiChoiceListView lv = (MultiChoiceListView) findViewById(R.id.lv_song_items);
         mMultiChoiceFacade = new MultiChoiceFacade(this, lv);
 
-        mMultiChoiceFacade.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SongItem item = mMultiChoiceFacade.getItem(position);
-                if (item.isHasLrc()) { // display lyric content
-                    Intent i = new Intent();
-                    i.setClass(LrcJaeger.this, DisplayLrcActivity.class);
-                    i.putExtra(Constants.INTENT_KEY_OBJECT, item);
-                    startActivity(i);
-                } else { // start a search activity
-                    Intent i = new Intent();
-                    i.setClass(LrcJaeger.this, SearchActivity.class);
-                    i.putExtra(Constants.INTENT_KEY_OBJECT, item);
-                    startActivity(i);
-                }
-            }
-        });
+        mMultiChoiceFacade.setOnItemClickListener(mOnItemClickListener);
+        mMultiChoiceFacade.setMultiChoiceModeListener(mActionModeCallback);
         mAdapter = mMultiChoiceFacade.getAdapter();
     }
+
+    private AdapterView.OnItemClickListener mOnItemClickListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            SongItem item = mMultiChoiceFacade.getItem(position);
+            if (item.isHasLrc()) { // display lyric content
+                Intent i = new Intent();
+                i.setClass(LrcJaeger.this, DisplayLrcActivity.class);
+                i.putExtra(Constants.INTENT_KEY_OBJECT, item);
+                startActivity(i);
+            } else { // start a search activity
+                Intent i = new Intent();
+                i.setClass(LrcJaeger.this, SearchActivity.class);
+                i.putExtra(Constants.INTENT_KEY_OBJECT, item);
+                startActivity(i);
+            }
+        }
+    };
+
+    private MultiChoiceListView.OnItemCheckedListener mActionModeCallback =
+            new MultiChoiceListView.OnItemCheckedListener() {
+
+        @Override
+        public void onItemCheckedStateChanged(ActionMode mode, int position, boolean checked) {
+            int count = mMultiChoiceFacade.getCheckedItemCount();
+            String str = String.format(getString(R.string.title_items_checked), count);
+            mode.setTitle(str);
+        }
+
+        @Override
+        public void onNothingChecked() {
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.activity_lrc_jaeger_contextual, menu);
+            return true;
+        }
+
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            ArrayList<SongItem> items = mMultiChoiceFacade.getCheckedItems();
+            switch (item.getItemId()) {
+                case R.id.action_delete_all_lrc:
+                    for (SongItem i : items) {
+                        File f = new File(i.getLrcPath());
+                        if (f.exists()) {
+                            boolean res = f.delete();
+                            Log.v(TAG, "deleting " + i.getTitle() + ", OK " + res);
+                        }
+                    }
+
+                    // update lrc icons which indicate whether the song has a lrc
+                    mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                    return true;
+
+                case R.id.action_downall_context:
+                    // update lrc icons which indicate whether the song has a lrc
+                    mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+        }
+    };
 
     @Override
     protected void onResume() {
@@ -166,6 +235,7 @@ public class LrcJaeger extends AppCompatActivity {
                                 String folder = Utils.getFolder(path);
                                 activity.mAllFolders.add(folder);
                                 if (!hiddenSet.contains(folder.hashCode())) {
+                                    // TODO change to facade
                                     activity.mAdapter.add(new SongItem(title, artist, path));
                                 }
                             } while (c.moveToNext());

@@ -3,8 +3,8 @@ package orz.ludysu.lrcjaeger;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,7 +24,7 @@ public class MultiChoiceFacade {
     private AppCompatActivity mActivity;
     private ActionMode mActionMode;
     private AdapterView.OnItemClickListener mListener;
-    private ActionMode.Callback mActionModeListener;
+    private MultiChoiceListView.OnItemCheckedListener mActionModeListener;
 
     public MultiChoiceFacade(AppCompatActivity context, MultiChoiceListView listView) {
         mActivity = context;
@@ -33,23 +33,7 @@ public class MultiChoiceFacade {
 
         mListView.setAdapter(mAdapter);
 
-        mListView.setOnItemCheckedListener(new MultiChoiceListView.OnItemCheckedListener() {
-            @Override
-            public void onItemCheckedStateChanged(View view, int position, boolean checked) {
-                Log.v(TAG, "onItemCheckedStateChanged " + position + " - " + checked);
-                if (mActionMode == null) {
-                    mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
-                }
-            }
-
-            @Override
-            public void onNothingChecked() {
-                Log.v(TAG, "onNothingChecked");
-                if (mActionMode != null) {
-                    mActionMode.finish();
-                }
-            }
-        });
+        mListView.setOnItemCheckedListener(mActionModeCallback);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -79,7 +63,6 @@ public class MultiChoiceFacade {
                     return false;
                 }
 
-
                 mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
                 mListView.setItemChecked(position, true);
                 return true;
@@ -87,7 +70,7 @@ public class MultiChoiceFacade {
         });
     }
 
-    public void setMultiChoiceModeListener(ActionMode.Callback callback) {
+    public void setMultiChoiceModeListener(MultiChoiceListView.OnItemCheckedListener callback) {
         if (callback == null) {
             throw new NullPointerException();
         }
@@ -106,43 +89,84 @@ public class MultiChoiceFacade {
         return mAdapter.getItem(position);
     }
 
-    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            // Inflate a menu resource providing context menu items
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.activity_lrc_jaeger_contextual, menu);
-            return true;
+    public ArrayList<SongItem> getCheckedItems() {
+        SparseBooleanArray checked = mListView.getCheckedItemPositions();
+        int size = checked.size();
+        ArrayList<SongItem> items = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            int key = checked.keyAt(i);
+            boolean value = checked.valueAt(i);
+            if (value) {
+                items.add(mAdapter.getItem(key));
+            }
         }
+        return items;
+    }
 
-        // Called each time the action mode is shown. Always called after onCreateActionMode, but
-        // may be called multiple times if the mode is invalidated.
+    public int getCheckedItemCount() {
+        return mListView.getCheckedItemCount();
+    }
+
+    private MultiChoiceListView.OnItemCheckedListener mActionModeCallback =
+            new MultiChoiceListView.OnItemCheckedListener() {
+
         @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false; // Return false if nothing is done
-        }
-
-        // Called when the user selects a contextual menu item
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_delete_all_lrc:
-                    return true;
-
-                case R.id.action_downall_context:
-                    return true;
-
-                default:
-                    return false;
+        public void onItemCheckedStateChanged(ActionMode mode, int position, boolean checked) {
+            //Log.v(TAG, "onItemCheckedStateChanged " + position + " - " + checked);
+            if (mActionMode == null) {
+                mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
+            }
+            if (mActionModeListener != null) {
+                mActionModeListener.onItemCheckedStateChanged(mActionMode, position, checked);
             }
         }
 
-        // Called when the user exits the action mode
+        @Override
+        public void onNothingChecked() {
+            Log.v(TAG, "onNothingChecked");
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+            if (mActionModeListener != null) {
+                mActionModeListener.onNothingChecked();
+            }
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            if (mActionModeListener != null) {
+                return mActionModeListener.onCreateActionMode(mode, menu);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            if (mActionModeListener != null) {
+                return mActionModeListener.onPrepareActionMode(mode, menu);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            boolean res = false;
+            if (mActionModeListener != null) {
+                res = mActionModeListener.onActionItemClicked(mode, item);
+            }
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+            return res;
+        }
+
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
             mListView.clearChoices();
+            if (mActionModeListener != null) {
+                mActionModeListener.onDestroyActionMode(mode);
+            }
         }
     };
 }
