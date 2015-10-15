@@ -226,7 +226,7 @@ public class LrcJaeger extends AppCompatActivity {
                     Cursor c = null;
                     try {
                         c = activity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                                PROJECTION, "is_music=?", new String[]{"1"}, "title_key");
+                                PROJECTION, "is_music=?", new String[]{"1"}, "title COLLATE LOCALIZED ASC");
                         if (c != null && c.moveToFirst()) {
                             do {
                                 String path = c.getString(1);
