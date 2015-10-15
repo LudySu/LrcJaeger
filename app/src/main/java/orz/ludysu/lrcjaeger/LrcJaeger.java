@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -35,7 +34,6 @@ public class LrcJaeger extends AppCompatActivity {
     private static final int MSG_UPDATE_LRC_ICON_ALL = 20;
     private static final int MSG_UPDATE_LRC_ICON = 21;
 
-    private ArrayAdapter mAdapter;
     private MenuItem mDownAllButton;
     private ProgressBar mProgressBar;
     private BulkDownloadTask mTask;
@@ -56,7 +54,6 @@ public class LrcJaeger extends AppCompatActivity {
 
         mMultiChoiceFacade.setOnItemClickListener(mOnItemClickListener);
         mMultiChoiceFacade.setMultiChoiceModeListener(mActionModeCallback);
-        mAdapter = mMultiChoiceFacade.getAdapter();
     }
 
     private AdapterView.OnItemClickListener mOnItemClickListener = new AdapterView.OnItemClickListener() {
@@ -161,8 +158,7 @@ public class LrcJaeger extends AppCompatActivity {
         if (mTask != null) {
             mTask.cancel(true);
         }
-        mAdapter.clear();
-        mAdapter = null;
+        mMultiChoiceFacade.clear();
         mUiHandler.removeCallbacksAndMessages(null);
         mUiHandler = null;
     }
@@ -222,7 +218,7 @@ public class LrcJaeger extends AppCompatActivity {
                     Set<Integer> hiddenSet = Utils.getHiddenFoldersFromPreference(activity);
 
                     // update song listview
-                    activity.mAdapter.clear();
+                    activity.mMultiChoiceFacade.clear();
                     Cursor c = null;
                     try {
                         c = activity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -235,8 +231,7 @@ public class LrcJaeger extends AppCompatActivity {
                                 String folder = Utils.getFolder(path);
                                 activity.mAllFolders.add(folder);
                                 if (!hiddenSet.contains(folder.hashCode())) {
-                                    // TODO change to facade
-                                    activity.mAdapter.add(new SongItem(title, artist, path));
+                                    activity.mMultiChoiceFacade.add(new SongItem(title, artist, path));
                                 }
                             } while (c.moveToNext());
                         }
@@ -249,8 +244,8 @@ public class LrcJaeger extends AppCompatActivity {
 
                 case MSG_DOWNLOAD_ALL:
                     final ArrayList<SongItem> listAll = new ArrayList<>();
-                    for (int i = 0; i < activity.mAdapter.getCount(); i++) {
-                        SongItem item = (SongItem) activity.mAdapter.getItem(i);
+                    for (int i = 0; i < activity.mMultiChoiceFacade.getCount(); i++) {
+                        SongItem item = (SongItem) activity.mMultiChoiceFacade.getItem(i);
                         if (!item.isHasLrc()) {
                             listAll.add(item);
                         }
@@ -286,11 +281,11 @@ public class LrcJaeger extends AppCompatActivity {
                     break;
 
                 case MSG_UPDATE_LRC_ICON_ALL:
-                    for (int i = 0; i < activity.mAdapter.getCount(); i++) {
-                        SongItem it = (SongItem) activity.mAdapter.getItem(i);
+                    for (int i = 0; i < activity.mMultiChoiceFacade.getCount(); i++) {
+                        SongItem it = activity.mMultiChoiceFacade.getItem(i);
                         it.updateStatus();
                     }
-                    activity.mAdapter.notifyDataSetChanged();
+                    activity.mMultiChoiceFacade.notifyDataSetChanged();
                     break;
 
                 default:

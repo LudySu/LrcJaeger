@@ -8,7 +8,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
 
@@ -77,16 +76,31 @@ public class MultiChoiceFacade {
         mActionModeListener = callback;
     }
 
-    public ArrayAdapter getAdapter() {
-        return mAdapter;
-    }
-
-    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
-        mListener = listener;
+    public void add(SongItem item) {
+        mAdapter.add(item);
     }
 
     public SongItem getItem(int position) {
         return mAdapter.getItem(position);
+    }
+
+    public int getCount() {
+        return mAdapter.getCount();
+    }
+
+    /**
+     * Clear adapter
+     */
+    public void clear() {
+        mAdapter.clear();
+    }
+
+    public void notifyDataSetChanged() {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
+        mListener = listener;
     }
 
     public ArrayList<SongItem> getCheckedItems() {
