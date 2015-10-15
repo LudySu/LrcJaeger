@@ -43,6 +43,7 @@ public class LrcJaeger extends AppCompatActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //TODO savedInstanceState
         Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_jaeger);
@@ -51,7 +52,7 @@ public class LrcJaeger extends AppCompatActivity {
         MultiChoiceListView lv = (MultiChoiceListView) findViewById(R.id.lv_song_items);
         mMultiChoiceFacade = new MultiChoiceFacade(this, lv);
 
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mMultiChoiceFacade.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SongItem item = mMultiChoiceFacade.getItem(position);

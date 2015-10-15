@@ -4,13 +4,22 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import java.util.HashMap;
+
+/**
+ * Because we target SDK 7 so need to take care of multi choice by ourselves, which is introduced
+ * from SDK 11
+ */
 public class MultiChoiceListView extends ListView {
+    private static final String TAG = "MultiChoiceListView";
 
     public OnItemCheckedListener mListener;
-
     private int mCheckedCount = 0;
+    private HashMap<Integer, Boolean> mCheckedStatus = new HashMap<>();
 
     public interface OnItemCheckedListener {
         /**
@@ -28,22 +37,37 @@ public class MultiChoiceListView extends ListView {
 
     public MultiChoiceListView(Context context) {
         super(context);
-        super.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
     }
 
     public MultiChoiceListView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        super.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
     }
 
     public MultiChoiceListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        super.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+    }
+
+    @Override
+    public void setAdapter(ListAdapter adapter) {
+        super.setAdapter(adapter);
+        if (!(adapter instanceof SongItemAdapter)) {
+            throw new IllegalArgumentException();
+        }
+
+        SongItemAdapter s = (SongItemAdapter) adapter;
+        s.setLrcClickListener(new SongItemAdapter.OnLrcClickListener() {
+            @Override
+            public void OnLrcClick(int position, View convertView, ViewGroup parent) {
+                Log.v(TAG, "lrc click " + position);
+                toggleItemChecked(position);
+            }
+        });
+
     }
 
     @Override
     public void setItemChecked (int position, boolean value) {
-        super.setItemChecked(position, value);
+        mCheckedStatus.put(position, value);
         if (value) {
             mCheckedCount++;
         } else {
@@ -52,7 +76,7 @@ public class MultiChoiceListView extends ListView {
 
         Log.v("ListView", "checked items " + super.getCheckedItemPositions());
         View view = getChildAtAbsolutePos(position);
-        updateViewAtPosition(view, position);
+        updateViewAtPosition(view, position, value);
 
         if (mListener != null) {
             mListener.onItemCheckedStateChanged(view, position, value);
@@ -62,13 +86,15 @@ public class MultiChoiceListView extends ListView {
         }
     }
 
-    private View getChildAtAbsolutePos(int position) {
-        int visiblePosition = super.getFirstVisiblePosition();
-        return getChildAt(position - visiblePosition);
+    @Override
+    public int getCheckedItemCount() {
+        return mCheckedCount;
     }
 
-    public int getCheckedCount() {
-        return mCheckedCount;
+    @Override
+    public boolean isItemChecked(int position) {
+        Boolean b = mCheckedStatus.get(position);
+        return b == null ? false : b;
     }
 
     public void toggleItemChecked(int position) {
@@ -82,17 +108,25 @@ public class MultiChoiceListView extends ListView {
         mListener = listener;
     }
 
-    public OnItemCheckedListener getOnItemCheckedListener() {
-        return mListener;
-    }
-
     @Override
     public void clearChoices() {
-        super.clearChoices();
         mCheckedCount = 0;
+        mCheckedStatus.clear();
+        int size = getChildCount();
+        for (int i = 0; i < size; i++) {
+            View v = getChildAtAbsolutePos(i);
+            updateViewAtPosition(v, i, false);
+        }
     }
 
-    private void updateViewAtPosition(View view, int position) {
+    private View getChildAtAbsolutePos(int position) {
+        int visiblePosition = super.getFirstVisiblePosition();
+        return getChildAt(position - visiblePosition);
+    }
+
+    private void updateViewAtPosition(View view, int position, boolean checked) {
+        SongItemAdapter adapter = (SongItemAdapter) getAdapter();
+        adapter.setItemChecked(position, checked);
         super.getAdapter().getView(position, view, this);
     }
 }

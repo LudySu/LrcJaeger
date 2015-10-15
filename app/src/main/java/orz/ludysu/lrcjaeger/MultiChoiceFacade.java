@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
@@ -25,18 +24,12 @@ public class MultiChoiceFacade {
     private AppCompatActivity mActivity;
     private ActionMode mActionMode;
     private AdapterView.OnItemClickListener mListener;
+    private ActionMode.Callback mActionModeListener;
 
     public MultiChoiceFacade(AppCompatActivity context, MultiChoiceListView listView) {
         mActivity = context;
         mListView = listView;
         mAdapter = new SongItemAdapter(context, new ArrayList<SongItem>());
-
-        mAdapter.setLrcClickListener(new SongItemAdapter.OnLrcClickListener() {
-            @Override
-            public void OnLrcClick(int position, View convertView, ViewGroup parent) {
-                mListView.toggleItemChecked(position);
-            }
-        });
 
         mListView.setAdapter(mAdapter);
 
@@ -47,13 +40,11 @@ public class MultiChoiceFacade {
                 if (mActionMode == null) {
                     mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
                 }
-                mAdapter.setItemChecked(view, checked);
             }
 
             @Override
             public void onNothingChecked() {
                 Log.v(TAG, "onNothingChecked");
-                mAdapter.clearChoice();
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
@@ -64,7 +55,7 @@ public class MultiChoiceFacade {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // disable item click when items are being checked
-                if (mListView.getCheckedCount() > 0) {
+                if (mListView.getCheckedItemCount() > 0) {
                     Log.v(TAG, "in check mode, ignore click");
                     return;
                 }
@@ -79,7 +70,7 @@ public class MultiChoiceFacade {
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mListView.getCheckedCount() > 0) {
+                if (mListView.getCheckedItemCount() > 0) {
                     Log.v(TAG, "in check mode, ignore long click");
                     return true;
                 }
@@ -88,14 +79,19 @@ public class MultiChoiceFacade {
                     return false;
                 }
 
-                if (mActionMode == null) {
-                    mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
-                }
+
+                mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
                 mListView.setItemChecked(position, true);
-                mAdapter.setItemChecked(view, true);
                 return true;
             }
         });
+    }
+
+    public void setMultiChoiceModeListener(ActionMode.Callback callback) {
+        if (callback == null) {
+            throw new NullPointerException();
+        }
+        mActionModeListener = callback;
     }
 
     public ArrayAdapter getAdapter() {
@@ -147,7 +143,6 @@ public class MultiChoiceFacade {
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
             mListView.clearChoices();
-            mAdapter.clearChoice();
         }
     };
 }

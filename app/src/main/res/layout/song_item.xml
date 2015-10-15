@@ -4,15 +4,17 @@
     android:layout_height="wrap_content"
     android:gravity="start"
     android:orientation="horizontal"
+    android:descendantFocusability="blocksDescendants"
     android:paddingTop="4dp"
     android:paddingBottom="4dp" >
 
     <TextView
         android:id="@+id/tv_has_lrc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
 
+        android:clickable="true"
         android:text="@string/lrc_icon"
         android:textSize="@dimen/text_size_large" />
 
