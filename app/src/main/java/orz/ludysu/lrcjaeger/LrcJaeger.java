@@ -32,6 +32,7 @@ public class LrcJaeger extends AppCompatActivity {
     private static final int MSG_DOWNLOAD_ITEMS = 11;
     private static final int MSG_UPDATE_LRC_ICON_ALL = 20;
     private static final int MSG_UPDATE_LRC_ICON = 21;
+    private static final int MSG_DELETE_ITEMS = 30;
 
     private BulkDownloadTask mTask;
     private MyHandler mUiHandler;
@@ -106,21 +107,13 @@ public class LrcJaeger extends AppCompatActivity {
             ArrayList<SongItem> items = mMultiChoiceFacade.getCheckedItems();
             switch (item.getItemId()) {
                 case R.id.action_delete_all_lrc:
-                    for (SongItem i : items) {
-                        File f = new File(i.getLrcPath());
-                        if (f.exists()) {
-                            boolean res = f.delete();
-                            Log.v(TAG, "deleting " + i.getTitle() + ", OK " + res);
-                        }
-                    }
-
-                    // update lrc icons which indicate whether the song has a lrc
-                    mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                    Message m = mUiHandler.obtainMessage(MSG_DELETE_ITEMS, items);
+                    mUiHandler.sendMessage(m);
                     return true;
 
                 case R.id.action_downall_context:
-                    Message m = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEMS, items);
-                    mUiHandler.sendMessage(m);
+                    Message msg = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEMS, items);
+                    mUiHandler.sendMessage(msg);
                     return true;
 
                 default:
@@ -291,6 +284,18 @@ public class LrcJaeger extends AppCompatActivity {
                         it.updateStatus();
                     }
                     activity.mMultiChoiceFacade.notifyDataSetChanged();
+                    break;
+
+                case MSG_DELETE_ITEMS:
+                    final ArrayList<SongItem> items = (ArrayList<SongItem>) msg.obj;
+                    for (SongItem i : items) {
+                        File f = new File(i.getLrcPath());
+                        if (f.exists()) {
+                            boolean res = f.delete();
+                            Log.v(TAG, "deleting " + i.getTitle() + ", OK " + res);
+                        }
+                    }
+                    sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
                     break;
 
                 default:
