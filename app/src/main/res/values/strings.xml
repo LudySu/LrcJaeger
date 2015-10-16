@@ -21,7 +21,7 @@
     <string name="title_display_lrc">Lrc content</string>
     <string name="title_hide_folder">Hide folders</string>
     <string name="title_lrc_path">Lrc path: %1$s</string>
-    <string name="toast_lrc_downloaded">%1$d of %2$ item(s) has been downloaded</string>
+    <string name="toast_lrc_downloaded">%1$d of %2$d item(s) has been downloaded</string>
     <string name="title_search_activity">Search Lrc</string>
     <string name="msg_lrc_downloading">Downloading, please wait......</string>
     <string name="msg_lrc_not_found">Lrc not found</string>
