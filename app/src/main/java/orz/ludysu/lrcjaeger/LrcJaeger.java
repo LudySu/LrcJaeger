@@ -47,6 +47,7 @@ public class LrcJaeger extends AppCompatActivity {
         Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_jaeger);
+        mProgressBar = (ProgressBar)getLayoutInflater().inflate(R.layout.progressbar, null);
 
         mUiHandler = new MyHandler(this);
         MultiChoiceListView lv = (MultiChoiceListView) findViewById(R.id.lv_song_items);
@@ -123,8 +124,9 @@ public class LrcJaeger extends AppCompatActivity {
                     return true;
 
                 case R.id.action_downall_context:
-                    // update lrc icons which indicate whether the song has a lrc
-                    mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+                    mDownAllButton = item;
+                    Message m = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEMS, items);
+                    mUiHandler.sendMessage(m);
                     return true;
 
                 default:
@@ -180,7 +182,6 @@ public class LrcJaeger extends AppCompatActivity {
                     break;
                 }
                 mDownAllButton = item;
-                mProgressBar = (ProgressBar)getLayoutInflater().inflate(R.layout.progressbar, null);
                 mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
                 break;
 
@@ -203,6 +204,34 @@ public class LrcJaeger extends AppCompatActivity {
 
         public MyHandler(LrcJaeger activity) {
             super(activity);
+        }
+
+        private void download(final ArrayList<SongItem> listAll, final LrcJaeger activity) {
+            if (listAll.size() > 0) {
+                MenuItemCompat.setActionView(activity.mDownAllButton, activity.mProgressBar);
+                MenuItemCompat.expandActionView(activity.mDownAllButton);
+
+                activity.mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
+                    @Override
+                    public void onFinish(int downloaded) {
+                        if (activity.mDownAllButton != null) {
+                            MenuItemCompat.collapseActionView(activity.mDownAllButton);
+                            MenuItemCompat.setActionView(activity.mDownAllButton, null);
+                        }
+                        sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
+
+                        String text = String.format(activity.getString(R.string.toast_lrc_downloaded),
+                                downloaded, listAll.size());
+                        Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onProgressUpdate(int progress) {
+                        activity.mProgressBar.setProgress(progress);
+                    }
+                });
+                activity.mTask.execute(listAll.toArray(new SongItem[1]));
+            }
         }
 
         @Override
@@ -242,39 +271,21 @@ public class LrcJaeger extends AppCompatActivity {
                     }
                     break;
 
+                case MSG_DOWNLOAD_ITEMS:
+                    final ArrayList<SongItem> list = (ArrayList<SongItem>) msg.obj;
+                    download(list, activity);
+                    break;
+
                 case MSG_DOWNLOAD_ALL:
                     final ArrayList<SongItem> listAll = new ArrayList<>();
-                    for (int i = 0; i < activity.mMultiChoiceFacade.getCount(); i++) {
-                        SongItem item = (SongItem) activity.mMultiChoiceFacade.getItem(i);
+                    int size = activity.mMultiChoiceFacade.getCount();
+                    for (int i = 0; i < size; i++) {
+                        SongItem item = activity.mMultiChoiceFacade.getItem(i);
                         if (!item.isHasLrc()) {
                             listAll.add(item);
                         }
                     }
-                    if (listAll.size() > 0) {
-                        MenuItemCompat.setActionView(activity.mDownAllButton, activity.mProgressBar);
-                        MenuItemCompat.expandActionView(activity.mDownAllButton);
-
-                        activity.mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
-                            @Override
-                            public void onFinish(int downloaded) {
-                                if (activity.mDownAllButton != null) {
-                                    MenuItemCompat.collapseActionView(activity.mDownAllButton);
-                                    MenuItemCompat.setActionView(activity.mDownAllButton, null);
-                                }
-                                sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
-
-                                String text = String.format(activity.getString(R.string.toast_lrc_downloaded),
-                                        downloaded, listAll.size());
-                                Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onProgressUpdate(int progress) {
-                                activity.mProgressBar.setProgress(progress);
-                            }
-                        });
-                        activity.mTask.execute(listAll.toArray(new SongItem[1]));
-                    }
+                    download(listAll, activity);
                     break;
 
                 case MSG_UPDATE_LRC_ICON:

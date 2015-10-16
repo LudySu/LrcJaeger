@@ -127,7 +127,7 @@ public class SearchActivity extends AppCompatActivity {
 
             switch (msg.what) {
                 case MSG_QUERY:
-                    if (activity.mQueryResult.size() > 0) {
+                    if (activity.mQueryResult != null && activity.mQueryResult.size() > 0) {
                         ArrayAdapter<QueryResult> adapter = new ArrayAdapter<>(activity,
                                 android.R.layout.simple_list_item_1, activity.mQueryResult);
                         activity.mListView.setAdapter(adapter);
