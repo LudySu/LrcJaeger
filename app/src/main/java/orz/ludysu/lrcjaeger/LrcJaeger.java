@@ -40,7 +40,6 @@ public class LrcJaeger extends AppCompatActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //TODO savedInstanceState
         Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_jaeger);

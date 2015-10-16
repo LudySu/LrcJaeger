@@ -137,7 +137,7 @@ public class TTDownloader {
         return false;
     }
     
-    public static int DOWNLOAD_SHORTEST_NAME = 1; // FIXME
+    public static int DOWNLOAD_SHORTEST_NAME = 1;
     public static int DOWNLOAD_CONTAIN_NAME = 2;
 
     /**
