@@ -14,6 +14,12 @@ import java.util.HashMap;
 public class SongItemAdapter extends ArrayAdapter<SongItem> {
     private static final String TAG = "SongItemAdapter";
 
+    // background color for current theme
+    private static int BACKGROUND_COLOR = Color.argb(255, 250, 250, 250);
+    private static int BACKGROUND_COLOR_CHECKED = Color.argb(255, 235, 235, 235);
+    private static int HAS_LRC_COLOR = Color.argb(255, 0, 162, 232);
+    private static int NO_LRC_COLOR = Color.LTGRAY;
+
     private LayoutInflater mInflater = null;
     private ArrayList<SongItem> mSongs;
     private OnLrcClickListener mLrcListener;
@@ -47,7 +53,7 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
     public void setItemChecked(View view, int position, boolean checked) {
         ViewHolder holder = (ViewHolder) view.getTag();
         mCheckedStat.put(position, checked);
-        updateLrcIconView(holder.mLrcIcon, checked, holder.mTextColor);
+        updateLrcIconView(holder, checked);
         //Log.v(TAG, "setItemChecked " + checked + ", at pos " + position);
     }
 
@@ -59,17 +65,21 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         mCheckedStat.clear();
     }
 
-    private void updateLrcIconView(TextView icon, boolean checked, int color) {
+    private void updateLrcIconView(ViewHolder holder, boolean checked) {
+        TextView icon = holder.mLrcIcon;
         if (checked) {
             icon.setTextColor(Color.TRANSPARENT);
             icon.setBackgroundResource(R.drawable.ic_check_circle_black_36dp);
+            holder.mItemView.setBackgroundColor(BACKGROUND_COLOR_CHECKED);
         } else {
-            icon.setTextColor(color);
+            icon.setTextColor(holder.mTextColor);
             icon.setBackgroundResource(0);
+            holder.mItemView.setBackgroundColor(BACKGROUND_COLOR);
         }
     }
 
     private class ViewHolder {
+        View mItemView;
         TextView mTitle;
         TextView mArtist;
         TextView mLrcIcon;
@@ -84,6 +94,7 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         if (convertView == null) { // init this item view
             convertView = mInflater.inflate(R.layout.song_item, parent, false);
             holder = new ViewHolder();
+            holder.mItemView = convertView;
             holder.mTitle = (TextView) convertView.findViewById(R.id.tv_song_title);
             holder.mArtist = (TextView) convertView.findViewById(R.id.tv_song_artist);
             holder.mLrcIcon = (TextView) convertView.findViewById(R.id.tv_has_lrc);
@@ -97,12 +108,12 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
         holder.mTitle.setText(item.getTitle());
         holder.mArtist.setText(item.getArtist());
 
-        holder.mTextColor = item.isHasLrc() ? Color.argb(255, 0, 162, 232) : Color.LTGRAY;
+        holder.mTextColor = item.isHasLrc() ? HAS_LRC_COLOR : NO_LRC_COLOR;
         TextView lrcIcon = holder.mLrcIcon;
         lrcIcon.setTextColor(holder.mTextColor);
         Boolean b = mCheckedStat.get(position);
         boolean checked = b == null ? false : b;
-        updateLrcIconView(lrcIcon, checked, holder.mTextColor);
+        updateLrcIconView(holder, checked);
 
         final View view = convertView;
         holder.mLrcIcon.setOnClickListener(new View.OnClickListener() {
