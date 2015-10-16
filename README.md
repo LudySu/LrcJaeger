@@ -10,6 +10,8 @@ LrcJaeger - A lyrics batch downloader for Android, which is great for ACG songs.
 
 ## Update（更新信息）
 
+- 2015-10-07: V1.3 release, small bug fixes
+- 2015-10-07: V1.2 release, Add multi choices and long click mode; more polished UI icons
 - 2015-10-07: V1.1 release, major update in many aspects
 - 2013-10-19: V1.0 release
 
@@ -20,6 +22,7 @@ LrcJaeger - A lyrics batch downloader for Android, which is great for ACG songs.
 <li>Hide the folders you don't want</li>
 <li>View the content of lyric, and hide the time tag (only text)</li>
 <li>Search for a lyric manually, download the version you want</li>
+<li>Long click or touch "Lrc" icon to enter multi choice mode</li>
 </ol>
 
 <ol>
@@ -27,6 +30,7 @@ LrcJaeger - A lyrics batch downloader for Android, which is great for ACG songs.
 <li>过滤不需要的文件夹</li>
 <li>点击已下载项：浏览歌词内容，并可隐藏歌词时间轴</li>
 <li>点击未下载项：搜索歌词，可选择你想要的版本</li>
+<li>长按或点击“词”图标进入多选模式，批量删除、下载选中歌词</li>
 </ol>
 
 ![](docs/screenshot1.png)
