@@ -40,7 +40,7 @@ public class BulkDownloadTask extends AsyncTask<SongItem, Integer, Integer> {
                         TTDownloader.DOWNLOAD_CONTAIN_NAME);
                 downloaded = result ? downloaded + 1: downloaded;   
             }
-            publishProgress(100 * count / total);
+            publishProgress(count);
         }
         Log.d(TAG, "downloaded " + downloaded + " of " + total + " items");
         return downloaded;

@@ -1,11 +1,11 @@
 package orz.ludysu.lrcjaeger;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
@@ -34,8 +33,6 @@ public class LrcJaeger extends AppCompatActivity {
     private static final int MSG_UPDATE_LRC_ICON_ALL = 20;
     private static final int MSG_UPDATE_LRC_ICON = 21;
 
-    private MenuItem mDownAllButton;
-    private ProgressBar mProgressBar;
     private BulkDownloadTask mTask;
     private MyHandler mUiHandler;
     private Set<String> mAllFolders = new HashSet<>();
@@ -47,7 +44,6 @@ public class LrcJaeger extends AppCompatActivity {
         Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_jaeger);
-        mProgressBar = (ProgressBar)getLayoutInflater().inflate(R.layout.progressbar, null);
 
         mUiHandler = new MyHandler(this);
         MultiChoiceListView lv = (MultiChoiceListView) findViewById(R.id.lv_song_items);
@@ -124,7 +120,6 @@ public class LrcJaeger extends AppCompatActivity {
                     return true;
 
                 case R.id.action_downall_context:
-                    mDownAllButton = item;
                     Message m = mUiHandler.obtainMessage(MSG_DOWNLOAD_ITEMS, items);
                     mUiHandler.sendMessage(m);
                     return true;
@@ -181,7 +176,6 @@ public class LrcJaeger extends AppCompatActivity {
                     Log.w(TAG, "no network connection");
                     break;
                 }
-                mDownAllButton = item;
                 mUiHandler.sendEmptyMessage(MSG_DOWNLOAD_ALL);
                 break;
 
@@ -208,16 +202,17 @@ public class LrcJaeger extends AppCompatActivity {
 
         private void download(final ArrayList<SongItem> listAll, final LrcJaeger activity) {
             if (listAll.size() > 0) {
-                MenuItemCompat.setActionView(activity.mDownAllButton, activity.mProgressBar);
-                MenuItemCompat.expandActionView(activity.mDownAllButton);
+                final ProgressDialog progressDialog = new ProgressDialog(activity);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setTitle(activity.getString(R.string.title_downloading));
+                progressDialog.setProgress(0);
+                progressDialog.setMax(listAll.size());
+                progressDialog.show();
 
                 activity.mTask = new BulkDownloadTask(new BulkDownloadTask.EventListener() {
                     @Override
                     public void onFinish(int downloaded) {
-                        if (activity.mDownAllButton != null) {
-                            MenuItemCompat.collapseActionView(activity.mDownAllButton);
-                            MenuItemCompat.setActionView(activity.mDownAllButton, null);
-                        }
+                        progressDialog.dismiss();
                         sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
 
                         String text = String.format(activity.getString(R.string.toast_lrc_downloaded),
@@ -227,7 +222,7 @@ public class LrcJaeger extends AppCompatActivity {
 
                     @Override
                     public void onProgressUpdate(int progress) {
-                        activity.mProgressBar.setProgress(progress);
+                        progressDialog.setProgress(progress);
                     }
                 });
                 activity.mTask.execute(listAll.toArray(new SongItem[1]));

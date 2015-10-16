@@ -12,6 +12,8 @@
     <string name="toast_no_network_connection">无 WiFi 或 3G 网络连接</string>
     <string name="toast_lrc_downloaded">已成功下载 %1$d/%2$d 项</string>
 
+    <string name="title_downloading">正在下载</string>
+
     <!-- HideFoldersActivity -->
     <string name="title_hide_folder">过滤文件夹</string>
     <string name="action_save">保存</string>
