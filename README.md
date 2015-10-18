@@ -10,8 +10,8 @@ LrcJaeger - A lyrics batch downloader for Android, which is great for ACG songs.
 
 ## Update（更新信息）
 
-- 2015-10-07: V1.3 release, small bug fixes
-- 2015-10-07: V1.2 release, Add multi choices and long click mode; more polished UI icons
+- 2015-10-16: V1.3 release, small bug fixes
+- 2015-10-16: V1.2 release, Add multi choices and long click mode; more polished UI icons
 - 2015-10-07: V1.1 release, major update in many aspects
 - 2013-10-19: V1.0 release
 
