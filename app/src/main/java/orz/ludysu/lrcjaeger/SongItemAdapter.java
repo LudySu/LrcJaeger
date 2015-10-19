@@ -15,10 +15,10 @@ public class SongItemAdapter extends ArrayAdapter<SongItem> {
     private static final String TAG = "SongItemAdapter";
 
     // background color for current theme
-    private static int BACKGROUND_COLOR = Color.argb(255, 250, 250, 250);
-    private static int BACKGROUND_COLOR_CHECKED = Color.argb(255, 235, 235, 235);
-    private static int HAS_LRC_COLOR = Color.argb(255, 0, 162, 232);
-    private static int NO_LRC_COLOR = Color.LTGRAY;
+    private static final int BACKGROUND_COLOR = Color.argb(255, 250, 250, 250);
+    private static final int BACKGROUND_COLOR_CHECKED = Color.argb(255, 235, 235, 235);
+    private static final int HAS_LRC_COLOR = Color.argb(255, 0, 162, 232);
+    private static final int NO_LRC_COLOR = Color.LTGRAY;
 
     private LayoutInflater mInflater = null;
     private ArrayList<SongItem> mSongs;
