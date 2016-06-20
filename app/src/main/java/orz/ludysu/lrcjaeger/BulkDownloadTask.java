@@ -11,8 +11,8 @@ public class BulkDownloadTask extends AsyncTask<SongItem, Integer, Integer> {
     private EventListener mListener;
     
     public interface EventListener {
-        public void onFinish(int downloaded);
-        public void onProgressUpdate(int progress);
+        void onFinish(int downloaded);
+        void onProgressUpdate(int progress);
     }
     
     public BulkDownloadTask(EventListener l) {

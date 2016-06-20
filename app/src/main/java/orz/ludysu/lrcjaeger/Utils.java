@@ -1,22 +1,28 @@
 package orz.ludysu.lrcjaeger;
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
+import android.os.Environment;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Environment;
-import android.util.Log;
-
 
 public class Utils {
 
     private static final String TAG = "Utils";
+
+    public static final String PREFERENCE_NAME = "prefs";
+    public static final String HIDE_FOLDER_PREF_KEY = "hide_folders";
+
+    private static Set<Integer> sHiddenFolders = null;
+    private static int sChangeCount = 0;
 
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager 
@@ -85,17 +91,53 @@ public class Utils {
     /**
      * Load hidden folders set by user from shared prefs
      */
-    public static Set<Integer> getHiddenFoldersFromPreference(Activity activity) {
-        SharedPreferences settings = activity.getSharedPreferences(HideFoldersActivity.PREFERENCE_NAME,
-                Activity.MODE_PRIVATE);
-        String folderHash = settings.getString(HideFoldersActivity.HIDE_FOLDER_PREF_KEY, null);
-        Set<Integer> set = new HashSet<>();
-        if (folderHash != null && folderHash.length() > 0) {
-            String[] tokens = folderHash.split(",");
-            for (String s : tokens) {
-                set.add(Integer.parseInt(s));
+    public static Set<Integer> loadHiddenFoldersFromDisk(Context context) {
+        if (sHiddenFolders == null) {
+            String folderHash = context.getSharedPreferences(PREFERENCE_NAME, Activity.MODE_PRIVATE).getString(HIDE_FOLDER_PREF_KEY, null);
+            sHiddenFolders = new HashSet<>();
+            if (folderHash != null && folderHash.length() > 0) {
+                String[] tokens = folderHash.split(",");
+                for (String s : tokens) {
+                    sHiddenFolders.add(Integer.parseInt(s));
+                }
             }
         }
-        return set;
+        return sHiddenFolders;
     }
+
+    private static void writeHiddenFolders(Context context, Set<Integer> set) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(PREFERENCE_NAME, Activity.MODE_PRIVATE).edit();
+        StringBuilder sb = new StringBuilder();
+        for (int v : set) {
+            sb.append(v);
+            sb.append(",");
+        }
+        if (set.size() > 0) {
+            sb.deleteCharAt(sb.length() - 1); // delete last ","
+        }
+        editor.putString(HIDE_FOLDER_PREF_KEY, sb.toString());
+
+        if (Build.VERSION.SDK_INT >= 9) {
+            editor.apply();
+        } else {
+            editor.commit();
+        }
+    }
+
+    public static void addHiddenFolder(Context context, int folderHash) {
+        sChangeCount++;
+        sHiddenFolders.add(folderHash);
+        if (sChangeCount >= 5) {
+            writeHiddenFolders(context, sHiddenFolders);
+        }
+    }
+
+    public static void removeHiddenFolder(Context context, int folderHash) {
+        sChangeCount++;
+        sHiddenFolders.remove(folderHash);
+        if (sChangeCount >= 5) {
+            writeHiddenFolders(context, sHiddenFolders);
+        }
+    }
+
 }

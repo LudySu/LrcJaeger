@@ -231,7 +231,7 @@ public class LrcJaeger extends AppCompatActivity {
             switch (msg.what) {
                 case MSG_QUERY_DB:
                     // folders in this set should be hidden to user
-                    Set<Integer> hiddenSet = Utils.getHiddenFoldersFromPreference(activity);
+                    Set<Integer> hiddenSet = Utils.loadHiddenFoldersFromDisk(activity);
 
                     // update song listview
                     activity.mMultiChoiceFacade.clear();
