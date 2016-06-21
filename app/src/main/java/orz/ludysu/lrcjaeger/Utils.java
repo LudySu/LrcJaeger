@@ -22,7 +22,7 @@ public class Utils {
     public static final String HIDE_FOLDER_PREF_KEY = "hide_folders";
 
     private static Set<Integer> sHiddenFolders = null;
-    private static int sChangeCount = 0;
+
 
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager 
@@ -105,14 +105,14 @@ public class Utils {
         return sHiddenFolders;
     }
 
-    private static void writeHiddenFolders(Context context, Set<Integer> set) {
+    public static void writeHiddenFolders(Context context) {
         SharedPreferences.Editor editor = context.getSharedPreferences(PREFERENCE_NAME, Activity.MODE_PRIVATE).edit();
         StringBuilder sb = new StringBuilder();
-        for (int v : set) {
+        for (int v : sHiddenFolders) {
             sb.append(v);
             sb.append(",");
         }
-        if (set.size() > 0) {
+        if (sHiddenFolders.size() > 0) {
             sb.deleteCharAt(sb.length() - 1); // delete last ","
         }
         editor.putString(HIDE_FOLDER_PREF_KEY, sb.toString());
@@ -125,19 +125,11 @@ public class Utils {
     }
 
     public static void addHiddenFolder(Context context, int folderHash) {
-        sChangeCount++;
         sHiddenFolders.add(folderHash);
-        if (sChangeCount >= 5) {
-            writeHiddenFolders(context, sHiddenFolders);
-        }
     }
 
     public static void removeHiddenFolder(Context context, int folderHash) {
-        sChangeCount++;
         sHiddenFolders.remove(folderHash);
-        if (sChangeCount >= 5) {
-            writeHiddenFolders(context, sHiddenFolders);
-        }
     }
 
 }

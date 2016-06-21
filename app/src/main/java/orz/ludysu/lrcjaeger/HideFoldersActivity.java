@@ -61,6 +61,12 @@ public class HideFoldersActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        Utils.writeHiddenFolders(this);
+        super.onDestroy();
+    }
+
     private class FolderAdapter extends ArrayAdapter<String> {
 
         private LayoutInflater mInflater = null;
