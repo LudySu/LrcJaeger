@@ -34,10 +34,6 @@
                 android:value="orz.ludysu.lrcjaeger.LrcJaeger" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/action_hide_folder" >
-        </activity>
-        <activity
             android:name=".HideFoldersActivity"
             android:label="@string/title_hide_folder" >
             <meta-data

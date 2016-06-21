@@ -1,11 +1,16 @@
 package orz.ludysu.lrcjaeger;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
@@ -26,6 +31,8 @@ public class LrcJaeger extends AppCompatActivity {
 
     private static final String TAG = "LrcJaeger";
     private static final String[] PROJECTION = new String[] {"_id", "_data", "artist", "title"};
+
+    private static final int PERMISSION_REQUEST_WRITE_STORAGE = 1;
     
     private static final int MSG_QUERY_DB = 1;
     private static final int MSG_DOWNLOAD_ALL = 10;
@@ -45,6 +52,53 @@ public class LrcJaeger extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_jaeger);
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                showPermissionDialog();
+                Log.w(TAG, "permission denied.");
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_WRITE_STORAGE);
+            }
+        }
+
+        mUiHandler = new MyHandler(this);
+        MultiChoiceListView lv = (MultiChoiceListView) findViewById(R.id.lv_song_items);
+        mMultiChoiceFacade = new MultiChoiceFacade(this, lv);
+
+        mMultiChoiceFacade.setOnItemClickListener(mOnItemClickListener);
+        mMultiChoiceFacade.setMultiChoiceModeListener(mActionModeCallback);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_WRITE_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                    initSongList();
+                } else {
+                    // permission denied
+                    showPermissionDialog();
+                }
+            }
+        }
+    }
+
+    private void showPermissionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.title_permission_dialog);
+        builder.setMessage(R.string.msg_permission_dialog);
+        builder.create().show();
+    }
+
+    private void init() {
         mUiHandler = new MyHandler(this);
         MultiChoiceListView lv = (MultiChoiceListView) findViewById(R.id.lv_song_items);
         mMultiChoiceFacade = new MultiChoiceFacade(this, lv);
@@ -131,10 +185,12 @@ public class LrcJaeger extends AppCompatActivity {
     protected void onResume() {
         Log.v(TAG, "onResume");
         super.onResume();
+        initSongList();
+    }
 
+    private void initSongList() {
         // initialize song list
         mUiHandler.sendEmptyMessage(MSG_QUERY_DB);
-
         // update lrc icons which indicate whether the song has a lrc
         mUiHandler.sendEmptyMessage(MSG_UPDATE_LRC_ICON_ALL);
     }

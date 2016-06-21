@@ -31,6 +31,8 @@
     <string name="msg_lrc_searching">Searching, please wait......</string>
     <string name="title_downloading">Downloading</string>
     <string name="title_items_checked">%1$d item(s)</string>
+    <string name="title_permission_dialog">Permission request</string>
+    <string name="msg_permission_dialog">Needs writing external storage permission to download lyrics</string>
 
 
 </resources>

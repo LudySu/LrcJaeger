@@ -14,6 +14,9 @@
 
     <string name="title_downloading">正在下载</string>
 
+    <string name="title_permission_dialog">请求权限</string>
+    <string name="msg_permission_dialog">需要写入外置存储区权限以下载歌词</string>
+
     <!-- HideFoldersActivity -->
     <string name="title_hide_folder">过滤文件夹</string>
     <string name="action_save">保存</string>
