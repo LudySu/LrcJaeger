@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SearchActivity extends AppCompatActivity {
     private static final String TAG = "SearchActivity";
@@ -33,7 +34,7 @@ public class SearchActivity extends AppCompatActivity {
     private SongItem mSongItem;
     private ListView mListView;
     private MyHandler mUiHandler;
-    private ArrayList<QueryResult> mQueryResult;
+    private List<QueryResult> mQueryResult = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +128,7 @@ public class SearchActivity extends AppCompatActivity {
 
             switch (msg.what) {
                 case MSG_QUERY:
-                    if (activity.mQueryResult != null && activity.mQueryResult.size() > 0) {
+                    if (activity.mQueryResult.size() > 0) {
                         ArrayAdapter<QueryResult> adapter = new ArrayAdapter<>(activity,
                                 android.R.layout.simple_list_item_1, activity.mQueryResult);
                         activity.mListView.setAdapter(adapter);

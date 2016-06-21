@@ -182,12 +182,12 @@ public class TTDownloader {
     
     /**
      * Query server for lyrics info, parameters MUST be encoded in utf8.
+     *
      * @param artist can be null
      * @param title title of the song
-     * @return
      */
     public static ArrayList<QueryResult> query(String artist, String title) {
-        ArrayList<QueryResult> result = new ArrayList<QueryResult>();
+        ArrayList<QueryResult> result = new ArrayList<>();
         String xml = getHttpResponse(buildQueryUrl(artist, title));
         if (xml == null) {
             Log.e(TAG, "Error: cannot get xml response from server");
