@@ -40,7 +40,7 @@ LrcJaeger - A lyrics batch downloader for Android, which is great for ACG songs.
 
 ## Usage（源码使用）
 
-Import the source folder into Eclipse and build and run. Or you can download the binary APK file below and get it run in your Android device right now.
+Import the source folder into Android Studio and build & run. Or you can download the binary APK file below and get it run in your Android device right now.
 
 把源码目录导入 Android Studio 并编译运行。或者下载下面的APK文件，可立即在你的Android设备上运行。
 
