@@ -90,6 +90,10 @@ public class HideFoldersActivity extends AppCompatActivity {
                 // this folder was set to be hidden
                 tv.setChecked(false);
                 tv.setTextColor(Color.LTGRAY);
+            } else {
+                // set default status
+                tv.setChecked(true);
+                tv.setTextColor(Color.BLACK);
             }
 
             return convertView;
