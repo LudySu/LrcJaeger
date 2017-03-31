@@ -29,7 +29,9 @@ public class HideFoldersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hide_folders);
         ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
 
         Intent i = getIntent();
         ArrayList<String> folders = i.getStringArrayListExtra(INTENT_DATA_KEY);

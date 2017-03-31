@@ -10,7 +10,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 /**
- * Because we target SDK 7 so need to take care of multi choices by ourselves, which is introduced
+ * Because we target SDK 9 so need to take care of multi choices by ourselves, which is introduced
  * from SDK 11
  */
 public class MultiChoiceListView extends ListView {
