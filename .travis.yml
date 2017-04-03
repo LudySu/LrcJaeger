@@ -1,4 +1,5 @@
 language: android
+jdk: oraclejdk8
 android:
   components:
   - tools
@@ -11,10 +12,6 @@ android:
 
   licenses:
   - android-sdk-license-.+
-
-jdk:
-  - openjdk8
-  - oraclejdk8
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
